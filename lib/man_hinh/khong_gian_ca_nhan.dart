@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../mo_hinh/ghi_chu.dart';
 
 class KhongGianCaNhan extends StatefulWidget {
@@ -16,6 +17,14 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
   final ImagePicker _picker = ImagePicker();
 
   String _taoId() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  Future<bool> _xinQuyenAnh() async {
+    if (Platform.isAndroid) {
+      final status = await Permission.photos.request();
+      return status.isGranted;
+    }
+    return true;
+  }
 
   void _themKyNiem() {
     TextEditingController controller = TextEditingController();
@@ -45,50 +54,55 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                     ),
                     const SizedBox(height: 15),
 
-                    // CHỌN ẢNH
                     ElevatedButton.icon(
                       icon: const Icon(Icons.image),
                       label: const Text("Chọn nhiều ảnh"),
                       onPressed: () async {
-                        final images = await _picker.pickMultiImage(
-                          imageQuality: 80,
-                          maxWidth: 1920,
-                        );
+                        bool duocPhep = await _xinQuyenAnh();
+                        if (!duocPhep) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("Chưa cấp quyền truy cập ảnh"),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final List<XFile>? images = await _picker
+                            .pickMultiImage(imageQuality: 80);
+
+                        if (images == null || images.isEmpty) return;
 
                         if (!mounted) return;
 
-                        if (images.isNotEmpty) {
-                          setStateDialog(() {
-                            selectedImages = images.map((e) => e.path).toList();
-                          });
-                        }
+                        setStateDialog(() {
+                          selectedImages = images.map((e) => e.path).toList();
+                        });
                       },
                     ),
 
                     const SizedBox(height: 10),
 
-                    // CHỌN VIDEO
                     ElevatedButton.icon(
                       icon: const Icon(Icons.video_library),
                       label: const Text("Chọn video"),
                       onPressed: () async {
-                        final video = await _picker.pickVideo(
+                        final XFile? video = await _picker.pickVideo(
                           source: ImageSource.gallery,
                         );
 
+                        if (video == null) return;
+
                         if (!mounted) return;
 
-                        if (video != null) {
-                          setStateDialog(() {
-                            selectedVideos.add(video.path);
-                          });
-                        }
+                        setStateDialog(() {
+                          selectedVideos.add(video.path);
+                        });
                       },
                     ),
 
                     const SizedBox(height: 10),
 
-                    // PREVIEW ẢNH
                     if (selectedImages.isNotEmpty)
                       SizedBox(
                         height: 100,
@@ -98,26 +112,19 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           itemBuilder: (context, index) {
                             final file = File(selectedImages[index]);
 
-                            if (!file.existsSync()) {
-                              return Container(
-                                width: 100,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image),
-                              );
-                            }
-
-                            return GestureDetector(
-                              onTap: () => _xemAnh(file),
-                              child: Padding(
-                                padding: const EdgeInsets.only(right: 8),
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: GestureDetector(
+                                onTap: () => _xemAnh(file),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
                                   child: Image.file(
                                     file,
                                     width: 100,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
+                                    errorBuilder: (context, error, stack) {
                                       return Container(
+                                        width: 100,
                                         color: Colors.grey[300],
                                         child: const Icon(Icons.broken_image),
                                       );
@@ -181,20 +188,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
         builder: (_) => Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(backgroundColor: Colors.black),
-          body: Center(
-            child: InteractiveViewer(
-              child: Image.file(
-                file,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.broken_image,
-                    color: Colors.white,
-                    size: 100,
-                  );
-                },
-              ),
-            ),
-          ),
+          body: Center(child: InteractiveViewer(child: Image.file(file))),
         ),
       ),
     );
@@ -262,34 +256,19 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: ghiChu.hinhAnhPaths.length,
-                              itemBuilder: (context, imgIndex) {
-                                final file = File(
-                                  ghiChu.hinhAnhPaths[imgIndex],
-                                );
+                              itemBuilder: (context, i) {
+                                final file = File(ghiChu.hinhAnhPaths[i]);
 
-                                if (!file.existsSync()) {
-                                  return const SizedBox();
-                                }
-
-                                return GestureDetector(
-                                  onTap: () => _xemAnh(file),
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 8),
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: GestureDetector(
+                                    onTap: () => _xemAnh(file),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: Image.file(
                                         file,
                                         width: 200,
                                         fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.grey[300],
-                                                child: const Icon(
-                                                  Icons.broken_image,
-                                                ),
-                                              );
-                                            },
                                       ),
                                     ),
                                   ),
@@ -350,14 +329,10 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   void initState() {
     super.initState();
-
-    controller = VideoPlayerController.file(File(widget.path));
-
-    controller.initialize().then((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
+    controller = VideoPlayerController.file(File(widget.path))
+      ..initialize().then((_) {
+        if (mounted) setState(() {});
+      });
   }
 
   @override
