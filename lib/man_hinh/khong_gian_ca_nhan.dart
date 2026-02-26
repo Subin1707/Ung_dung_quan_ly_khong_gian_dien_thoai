@@ -45,11 +45,16 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                     ),
                     const SizedBox(height: 15),
 
+                    // CHỌN ẢNH
                     ElevatedButton.icon(
                       icon: const Icon(Icons.image),
                       label: const Text("Chọn nhiều ảnh"),
                       onPressed: () async {
-                        final images = await _picker.pickMultiImage();
+                        final images = await _picker.pickMultiImage(
+                          imageQuality: 80,
+                          maxWidth: 1920,
+                        );
+
                         if (!mounted) return;
 
                         if (images.isNotEmpty) {
@@ -62,6 +67,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                     const SizedBox(height: 10),
 
+                    // CHỌN VIDEO
                     ElevatedButton.icon(
                       icon: const Icon(Icons.video_library),
                       label: const Text("Chọn video"),
@@ -69,6 +75,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         final video = await _picker.pickVideo(
                           source: ImageSource.gallery,
                         );
+
                         if (!mounted) return;
 
                         if (video != null) {
@@ -81,6 +88,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                     const SizedBox(height: 10),
 
+                    // PREVIEW ẢNH
                     if (selectedImages.isNotEmpty)
                       SizedBox(
                         height: 100,
@@ -89,9 +97,15 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           itemCount: selectedImages.length,
                           itemBuilder: (context, index) {
                             final file = File(selectedImages[index]);
+
                             if (!file.existsSync()) {
-                              return const SizedBox();
+                              return Container(
+                                width: 100,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image),
+                              );
                             }
+
                             return GestureDetector(
                               onTap: () => _xemAnh(file),
                               child: Padding(
@@ -102,6 +116,12 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                                     file,
                                     width: 100,
                                     fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey[300],
+                                        child: const Icon(Icons.broken_image),
+                                      );
+                                    },
                                   ),
                                 ),
                               ),
@@ -136,8 +156,8 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         GhiChu(
                           id: _taoId(),
                           noiDung: controller.text,
-                          hinhAnhPaths: selectedImages,
-                          videoPaths: selectedVideos,
+                          hinhAnhPaths: List.from(selectedImages),
+                          videoPaths: List.from(selectedVideos),
                         ),
                       );
                     });
@@ -161,7 +181,20 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
         builder: (_) => Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(backgroundColor: Colors.black),
-          body: Center(child: Image.file(file)),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.file(
+                file,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.broken_image,
+                    color: Colors.white,
+                    size: 100,
+                  );
+                },
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -248,6 +281,15 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                                         file,
                                         width: 200,
                                         fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey[300],
+                                                child: const Icon(
+                                                  Icons.broken_image,
+                                                ),
+                                              );
+                                            },
                                       ),
                                     ),
                                   ),
@@ -258,16 +300,18 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                         if (ghiChu.coVideo)
                           Column(
-                            children: ghiChu.videoPaths.map((v) {
-                              return IconButton(
-                                icon: const Icon(
-                                  Icons.play_circle,
-                                  size: 60,
-                                  color: Colors.deepPurple,
-                                ),
-                                onPressed: () => _xemVideo(v),
-                              );
-                            }).toList(),
+                            children: ghiChu.videoPaths
+                                .map(
+                                  (v) => IconButton(
+                                    icon: const Icon(
+                                      Icons.play_circle,
+                                      size: 60,
+                                      color: Colors.deepPurple,
+                                    ),
+                                    onPressed: () => _xemVideo(v),
+                                  ),
+                                )
+                                .toList(),
                           ),
 
                         Align(
@@ -306,10 +350,14 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   void initState() {
     super.initState();
-    controller = VideoPlayerController.file(File(widget.path))
-      ..initialize().then((_) {
+
+    controller = VideoPlayerController.file(File(widget.path));
+
+    controller.initialize().then((_) {
+      if (mounted) {
         setState(() {});
-      });
+      }
+    });
   }
 
   @override
