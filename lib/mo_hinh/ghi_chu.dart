@@ -1,27 +1,13 @@
 class GhiChu {
-  final String id;
+  String id;
   String noiDung;
-  String? duongDanAnh;
-  String? duongDanVideo;
+  String? hinhAnhPath;
   DateTime thoiGianTao;
 
   GhiChu({
     required this.id,
     required this.noiDung,
-    this.duongDanAnh,
-    this.duongDanVideo,
+    this.hinhAnhPath,
     DateTime? thoiGianTao,
   }) : thoiGianTao = thoiGianTao ?? DateTime.now();
-
-  void capNhatNoiDung(String noiDungMoi) {
-    noiDung = noiDungMoi;
-  }
-
-  void capNhatAnh(String? duongDanMoi) {
-    duongDanAnh = duongDanMoi;
-  }
-
-  void capNhatVideo(String? duongDanMoi) {
-    duongDanVideo = duongDanMoi;
-  }
 }

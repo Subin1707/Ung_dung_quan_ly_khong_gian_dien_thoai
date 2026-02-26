@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../mo_hinh/ghi_chu.dart';
 
 class KhongGianCaNhan extends StatefulWidget {
@@ -10,11 +12,15 @@ class KhongGianCaNhan extends StatefulWidget {
 
 class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
   final List<GhiChu> danhSach = [];
+  final ImagePicker _picker = ImagePicker();
+
+  String _taoId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
 
   void _themKyNiem() {
     TextEditingController controller = TextEditingController();
-    String? selectedImage;
-    String? selectedVideo;
+    String? selectedImagePath;
 
     showDialog(
       context: context,
@@ -28,45 +34,40 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                   children: [
                     TextField(
                       controller: controller,
-                      decoration: const InputDecoration(labelText: "Nội dung"),
+                      decoration: const InputDecoration(
+                        labelText: "Nội dung",
+                        border: OutlineInputBorder(),
+                      ),
                     ),
 
                     const SizedBox(height: 15),
 
                     ElevatedButton.icon(
                       icon: const Icon(Icons.image),
-                      label: const Text("Chọn ảnh mẫu"),
-                      onPressed: () {
-                        setStateDialog(() {
-                          selectedImage = "lib/assets/hinh_anh/anh1.jpg";
-                          selectedVideo = null;
-                        });
+                      label: const Text("Chọn ảnh từ máy"),
+                      onPressed: () async {
+                        final XFile? image = await _picker.pickImage(
+                          source: ImageSource.gallery,
+                        );
+
+                        if (image != null) {
+                          setStateDialog(() {
+                            selectedImagePath = image.path;
+                          });
+                        }
                       },
                     ),
 
                     const SizedBox(height: 10),
 
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.video_library),
-                      label: const Text("Chọn video mẫu"),
-                      onPressed: () {
-                        setStateDialog(() {
-                          selectedVideo = "lib/assets/video/video1.mp4";
-                          selectedImage = null;
-                        });
-                      },
-                    ),
-
-                    if (selectedImage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Image.asset(selectedImage!, height: 100),
-                      ),
-
-                    if (selectedVideo != null)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: Icon(Icons.movie, size: 60),
+                    if (selectedImagePath != null)
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.file(
+                          File(selectedImagePath!),
+                          height: 150,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                   ],
                 ),
@@ -83,9 +84,9 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                     setState(() {
                       danhSach.add(
                         GhiChu(
+                          id: _taoId(),
                           noiDung: controller.text,
-                          hinhAnh: selectedImage,
-                          video: selectedVideo,
+                          hinhAnhPath: selectedImagePath,
                         ),
                       );
                     });
@@ -111,14 +112,12 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Không gian cá nhân")),
+      appBar: AppBar(
+        title: const Text("Không gian cá nhân"),
+        centerTitle: true,
+      ),
       body: danhSach.isEmpty
-          ? const Center(
-              child: Text(
-                "Chưa có kỷ niệm nào",
-                style: TextStyle(fontSize: 16),
-              ),
-            )
+          ? const Center(child: Text("Chưa có kỷ niệm nào"))
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: danhSach.length,
@@ -126,6 +125,10 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                 final ghiChu = danhSach[index];
 
                 return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 6,
                   margin: const EdgeInsets.only(bottom: 16),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -142,24 +145,14 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                         const SizedBox(height: 10),
 
-                        if (ghiChu.hinhAnh != null)
+                        if (ghiChu.hinhAnhPath != null)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.asset(
-                              ghiChu.hinhAnh!,
-                              height: 150,
+                            child: Image.file(
+                              File(ghiChu.hinhAnhPath!),
+                              height: 200,
                               width: double.infinity,
                               fit: BoxFit.cover,
-                            ),
-                          ),
-
-                        if (ghiChu.video != null)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 10),
-                            child: Icon(
-                              Icons.movie,
-                              size: 80,
-                              color: Colors.blue,
                             ),
                           ),
 
