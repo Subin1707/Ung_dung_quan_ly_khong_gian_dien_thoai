@@ -10,14 +10,13 @@ class KhongGianLamViec extends StatefulWidget {
 }
 
 class _KhongGianLamViecState extends State<KhongGianLamViec> {
-  List<CongViec> danhSach = [];
+  final List<CongViec> danhSach = [];
   Timer? timer;
 
   @override
   void initState() {
     super.initState();
-
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
       setState(() {});
     });
   }
@@ -28,6 +27,11 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     super.dispose();
   }
 
+  // ================= ID TỰ SINH =================
+  String _taoId() {
+    return DateTime.now().millisecondsSinceEpoch.toString();
+  }
+
   // ================= THÊM / SỬA =================
 
   void _moHopThoai({int? index}) {
@@ -35,7 +39,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
       text: index != null ? danhSach[index].tieuDe : "",
     );
 
-    DateTime? selectedDate = index != null ? danhSach[index].thoiGian : null;
+    DateTime? selectedDate = index != null ? danhSach[index].thoiGianHen : null;
 
     showDialog(
       context: context,
@@ -114,14 +118,14 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                       if (index == null) {
                         danhSach.add(
                           CongViec(
+                            id: _taoId(),
                             tieuDe: controller.text,
-                            daHoanThanh: false,
-                            thoiGian: selectedDate,
+                            thoiGianHen: selectedDate,
                           ),
                         );
                       } else {
-                        danhSach[index].tieuDe = controller.text;
-                        danhSach[index].thoiGian = selectedDate;
+                        danhSach[index].capNhatTieuDe(controller.text);
+                        danhSach[index].capNhatHenGio(selectedDate);
                       }
                     });
 
@@ -137,6 +141,8 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     );
   }
 
+  // ================= XỬ LÝ =================
+
   void _xoa(int index) {
     setState(() {
       danhSach.removeAt(index);
@@ -145,7 +151,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
   void _toggle(int index) {
     setState(() {
-      danhSach[index].daHoanThanh = !danhSach[index].daHoanThanh;
+      danhSach[index].toggleHoanThanh();
     });
   }
 
@@ -172,172 +178,77 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
         title: const Text("Không gian làm việc"),
         centerTitle: true,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFE3F2FD), Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Column(
-          children: [
-            // ===== HEADER =====
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 10),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Tổng công việc",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      body: danhSach.isEmpty
+          ? const Center(child: Text("Chưa có công việc"))
+          : ListView.builder(
+              itemCount: danhSach.length,
+              itemBuilder: (context, index) {
+                final congViec = danhSach[index];
+
+                bool hetHan = false;
+                if (congViec.thoiGianHen != null) {
+                  hetHan = congViec.thoiGianHen!.isBefore(DateTime.now());
+                }
+
+                return Card(
+                  margin: const EdgeInsets.all(12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  Text(
-                    "${danhSach.length}",
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // ===== DANH SÁCH =====
-            Expanded(
-              child: danhSach.isEmpty
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.work_outline,
-                            size: 60,
-                            color: Colors.grey,
-                          ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Chưa có công việc",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: danhSach.length,
-                      itemBuilder: (context, index) {
-                        final congViec = danhSach[index];
-
-                        bool hetHan = false;
-                        if (congViec.thoiGian != null) {
-                          hetHan = congViec.thoiGian!.isBefore(DateTime.now());
-                        }
-
-                        return Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 8),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Row(
-                              children: [
-                                Checkbox(
-                                  value: congViec.daHoanThanh,
-                                  activeColor: Colors.blue,
-                                  onChanged: (_) => _toggle(index),
+                  elevation: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: congViec.daHoanThanh,
+                          onChanged: (_) => _toggle(index),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                congViec.tieuDe,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  decoration: congViec.daHoanThanh
+                                      ? TextDecoration.lineThrough
+                                      : null,
                                 ),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        congViec.tieuDe,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                          decoration: congViec.daHoanThanh
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      if (congViec.thoiGian != null)
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time,
-                                              size: 16,
-                                              color: hetHan
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                            ),
-                                            const SizedBox(width: 5),
-                                            Text(
-                                              _thoiGianConLai(
-                                                congViec.thoiGian!,
-                                              ),
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: hetHan
-                                                    ? Colors.red
-                                                    : Colors.green,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
+                              ),
+                              const SizedBox(height: 6),
+                              if (congViec.thoiGianHen != null)
+                                Text(
+                                  _thoiGianConLai(congViec.thoiGianHen!),
+                                  style: TextStyle(
+                                    color: hetHan ? Colors.red : Colors.green,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                Column(
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.edit,
-                                        color: Colors.blue,
-                                      ),
-                                      onPressed: () =>
-                                          _moHopThoai(index: index),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () => _xoa(index),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                            ],
                           ),
-                        );
-                      },
+                        ),
+                        Column(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _moHopThoai(index: index),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _xoa(index),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
         onPressed: () => _moHopThoai(),
         child: const Icon(Icons.add),
       ),
