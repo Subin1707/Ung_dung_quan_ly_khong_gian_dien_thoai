@@ -38,7 +38,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                       label: const Text("Chọn ảnh mẫu"),
                       onPressed: () {
                         setStateDialog(() {
-                          selectedImage = "assets/hinh_anh/anh1.jpg";
+                          selectedImage = "lib/assets/hinh_anh/anh1.jpg";
                           selectedVideo = null;
                         });
                       },
@@ -51,7 +51,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                       label: const Text("Chọn video mẫu"),
                       onPressed: () {
                         setStateDialog(() {
-                          selectedVideo = "assets/video/video1.mp4";
+                          selectedVideo = "lib/assets/video/video1.mp4";
                           selectedImage = null;
                         });
                       },
