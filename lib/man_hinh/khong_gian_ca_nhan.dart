@@ -14,13 +14,12 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
   final List<GhiChu> danhSach = [];
   final ImagePicker _picker = ImagePicker();
 
-  String _taoId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
+  String _taoId() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void _themKyNiem() {
     TextEditingController controller = TextEditingController();
-    String? selectedImagePath;
+    List<String> selectedImages = [];
+    List<String> selectedVideos = [];
 
     showDialog(
       context: context,
@@ -39,34 +38,75 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                       controller: controller,
                       maxLines: 3,
                       decoration: const InputDecoration(
-                        labelText: "Nội dung kỷ niệm",
+                        labelText: "Nội dung",
                         border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 15),
+
                     ElevatedButton.icon(
                       icon: const Icon(Icons.image),
-                      label: const Text("Chọn ảnh từ máy"),
+                      label: const Text("Chọn nhiều ảnh"),
                       onPressed: () async {
-                        final XFile? image = await _picker.pickImage(
-                          source: ImageSource.gallery,
-                        );
+                        final images = await _picker.pickMultiImage();
 
-                        if (image != null) {
+                        if (images.isNotEmpty) {
                           setStateDialog(() {
-                            selectedImagePath = image.path;
+                            selectedImages = images.map((e) => e.path).toList();
                           });
                         }
                       },
                     ),
+
                     const SizedBox(height: 10),
-                    if (selectedImagePath != null)
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.file(
-                          File(selectedImagePath!),
-                          height: 150,
-                          fit: BoxFit.cover,
+
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.video_library),
+                      label: const Text("Chọn video"),
+                      onPressed: () async {
+                        final video = await _picker.pickVideo(
+                          source: ImageSource.gallery,
+                        );
+
+                        if (video != null) {
+                          setStateDialog(() {
+                            selectedVideos.add(video.path);
+                          });
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    if (selectedImages.isNotEmpty)
+                      SizedBox(
+                        height: 100,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: selectedImages.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(selectedImages[index]),
+                                  width: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+
+                    if (selectedVideos.isNotEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 10),
+                        child: Icon(
+                          Icons.movie,
+                          size: 50,
+                          color: Colors.deepPurple,
                         ),
                       ),
                   ],
@@ -86,7 +126,8 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         GhiChu(
                           id: _taoId(),
                           noiDung: controller.text,
-                          hinhAnhPath: selectedImagePath,
+                          hinhAnhPaths: selectedImages,
+                          videoPaths: selectedVideos,
                         ),
                       );
                     });
@@ -116,150 +157,90 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
         title: const Text("Không gian cá nhân"),
         centerTitle: true,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFEDE7F6), Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.all(16),
+      body: danhSach.isEmpty
+          ? const Center(child: Text("Chưa có kỷ niệm nào"))
+          : ListView.builder(
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(25),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 10),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Tổng kỷ niệm",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    "${danhSach.length}",
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+              itemCount: danhSach.length,
+              itemBuilder: (context, index) {
+                final ghiChu = danhSach[index];
 
-            Expanded(
-              child: danhSach.isEmpty
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.photo_album_outlined,
-                            size: 70,
+                return Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  elevation: 6,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ghiChu.noiDung,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        Text(
+                          ghiChu.thoiGianFormatted,
+                          style: const TextStyle(
+                            fontSize: 12,
                             color: Colors.grey,
                           ),
-                          SizedBox(height: 10),
-                          Text(
-                            "Chưa có kỷ niệm nào",
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: danhSach.length,
-                      itemBuilder: (context, index) {
-                        final ghiChu = danhSach[index];
+                        ),
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 10),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.favorite,
-                                      color: Colors.pink,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        ghiChu.noiDung,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                        const SizedBox(height: 10),
 
-                                const SizedBox(height: 8),
-
-                                // ===== THỜI GIAN =====
-                                Text(
-                                  "Ngày tạo: ${ghiChu.thoiGianTao.day}/${ghiChu.thoiGianTao.month}/${ghiChu.thoiGianTao.year}",
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                // ===== ẢNH =====
-                                if (ghiChu.hinhAnhPath != null)
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(20),
+                        if (ghiChu.coAnh)
+                          SizedBox(
+                            height: 200,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: ghiChu.hinhAnhPaths.length,
+                              itemBuilder: (context, imgIndex) {
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(15),
                                     child: Image.file(
-                                      File(ghiChu.hinhAnhPath!),
-                                      height: 200,
-                                      width: double.infinity,
+                                      File(ghiChu.hinhAnhPaths[imgIndex]),
+                                      width: 200,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
-
-                                const SizedBox(height: 10),
-
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () => _xoa(index),
-                                  ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ),
-                        );
-                      },
+
+                        if (ghiChu.coVideo)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 10),
+                            child: Icon(
+                              Icons.movie,
+                              size: 60,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => _xoa(index),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
-      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.deepPurple,
         onPressed: _themKyNiem,
