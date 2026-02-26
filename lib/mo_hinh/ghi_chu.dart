@@ -17,8 +17,8 @@ class GhiChu {
     List<String>? videoPaths,
     DateTime? thoiGianTao,
     this.thoiGianCapNhat,
-  }) : hinhAnhPaths = hinhAnhPaths ?? [],
-       videoPaths = videoPaths ?? [],
+  }) : hinhAnhPaths = List.unmodifiable(hinhAnhPaths ?? []),
+       videoPaths = List.unmodifiable(videoPaths ?? []),
        thoiGianTao = thoiGianTao ?? DateTime.now();
 
   bool get coAnh => hinhAnhPaths.isNotEmpty;
@@ -32,15 +32,16 @@ class GhiChu {
   }
 
   String get thoiGianFormatted {
-    return "${thoiGianTao.day}/${thoiGianTao.month}/${thoiGianTao.year} "
-        "${thoiGianTao.hour}:${thoiGianTao.minute}";
+    final p = (int n) => n.toString().padLeft(2, '0');
+
+    return "${p(thoiGianTao.day)}/${p(thoiGianTao.month)}/${thoiGianTao.year} "
+        "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
   }
 
   GhiChu copyWith({
     String? noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
-    DateTime? thoiGianCapNhat,
   }) {
     return GhiChu(
       id: id,
@@ -48,7 +49,7 @@ class GhiChu {
       hinhAnhPaths: hinhAnhPaths ?? this.hinhAnhPaths,
       videoPaths: videoPaths ?? this.videoPaths,
       thoiGianTao: thoiGianTao,
-      thoiGianCapNhat: thoiGianCapNhat ?? DateTime.now(),
+      thoiGianCapNhat: DateTime.now(),
     );
   }
 
@@ -65,13 +66,14 @@ class GhiChu {
 
   factory GhiChu.fromMap(Map<String, dynamic> map) {
     return GhiChu(
-      id: map['id'],
-      noiDung: map['noiDung'],
+      id: map['id'] ?? '',
+      noiDung: map['noiDung'] ?? '',
       hinhAnhPaths: List<String>.from(map['hinhAnhPaths'] ?? []),
       videoPaths: List<String>.from(map['videoPaths'] ?? []),
-      thoiGianTao: DateTime.parse(map['thoiGianTao']),
+      thoiGianTao:
+          DateTime.tryParse(map['thoiGianTao'] ?? '') ?? DateTime.now(),
       thoiGianCapNhat: map['thoiGianCapNhat'] != null
-          ? DateTime.parse(map['thoiGianCapNhat'])
+          ? DateTime.tryParse(map['thoiGianCapNhat'])
           : null,
     );
   }

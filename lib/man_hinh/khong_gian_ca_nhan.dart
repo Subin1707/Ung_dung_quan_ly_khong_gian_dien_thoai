@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
 import '../mo_hinh/ghi_chu.dart';
 
 class KhongGianCaNhan extends StatefulWidget {
@@ -49,6 +50,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                       label: const Text("Chọn nhiều ảnh"),
                       onPressed: () async {
                         final images = await _picker.pickMultiImage();
+                        if (!mounted) return;
 
                         if (images.isNotEmpty) {
                           setStateDialog(() {
@@ -67,6 +69,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         final video = await _picker.pickVideo(
                           source: ImageSource.gallery,
                         );
+                        if (!mounted) return;
 
                         if (video != null) {
                           setStateDialog(() {
@@ -85,14 +88,21 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           scrollDirection: Axis.horizontal,
                           itemCount: selectedImages.length,
                           itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  File(selectedImages[index]),
-                                  width: 100,
-                                  fit: BoxFit.cover,
+                            final file = File(selectedImages[index]);
+                            if (!file.existsSync()) {
+                              return const SizedBox();
+                            }
+                            return GestureDetector(
+                              onTap: () => _xemAnh(file),
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.file(
+                                    file,
+                                    width: 100,
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
                             );
@@ -144,6 +154,26 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
     );
   }
 
+  void _xemAnh(File file) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(backgroundColor: Colors.black),
+          body: Center(child: Image.file(file)),
+        ),
+      ),
+    );
+  }
+
+  void _xemVideo(String path) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => VideoScreen(path: path)),
+    );
+  }
+
   void _xoa(int index) {
     setState(() {
       danhSach.removeAt(index);
@@ -183,9 +213,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         const SizedBox(height: 6),
-
                         Text(
                           ghiChu.thoiGianFormatted,
                           style: const TextStyle(
@@ -193,7 +221,6 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                             color: Colors.grey,
                           ),
                         ),
-
                         const SizedBox(height: 10),
 
                         if (ghiChu.coAnh)
@@ -203,14 +230,25 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                               scrollDirection: Axis.horizontal,
                               itemCount: ghiChu.hinhAnhPaths.length,
                               itemBuilder: (context, imgIndex) {
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(15),
-                                    child: Image.file(
-                                      File(ghiChu.hinhAnhPaths[imgIndex]),
-                                      width: 200,
-                                      fit: BoxFit.cover,
+                                final file = File(
+                                  ghiChu.hinhAnhPaths[imgIndex],
+                                );
+
+                                if (!file.existsSync()) {
+                                  return const SizedBox();
+                                }
+
+                                return GestureDetector(
+                                  onTap: () => _xemAnh(file),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(15),
+                                      child: Image.file(
+                                        file,
+                                        width: 200,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -219,13 +257,17 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           ),
 
                         if (ghiChu.coVideo)
-                          const Padding(
-                            padding: EdgeInsets.only(top: 10),
-                            child: Icon(
-                              Icons.movie,
-                              size: 60,
-                              color: Colors.deepPurple,
-                            ),
+                          Column(
+                            children: ghiChu.videoPaths.map((v) {
+                              return IconButton(
+                                icon: const Icon(
+                                  Icons.play_circle,
+                                  size: 60,
+                                  color: Colors.deepPurple,
+                                ),
+                                onPressed: () => _xemVideo(v),
+                              );
+                            }).toList(),
                           ),
 
                         Align(
@@ -245,6 +287,59 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
         backgroundColor: Colors.deepPurple,
         onPressed: _themKyNiem,
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+class VideoScreen extends StatefulWidget {
+  final String path;
+  const VideoScreen({super.key, required this.path});
+
+  @override
+  State<VideoScreen> createState() => _VideoScreenState();
+}
+
+class _VideoScreenState extends State<VideoScreen> {
+  late VideoPlayerController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = VideoPlayerController.file(File(widget.path))
+      ..initialize().then((_) {
+        setState(() {});
+      });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(backgroundColor: Colors.black),
+      body: Center(
+        child: controller.value.isInitialized
+            ? AspectRatio(
+                aspectRatio: controller.value.aspectRatio,
+                child: VideoPlayer(controller),
+              )
+            : const CircularProgressIndicator(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            controller.value.isPlaying ? controller.pause() : controller.play();
+          });
+        },
+        child: Icon(
+          controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+        ),
       ),
     );
   }
