@@ -1,0 +1,14 @@
+{
+    "files.exclude": {
+        "linux/**": false
+    },
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "C_Cpp.intelliSenseEngine": "default",
+    "C_Cpp.files.exclude": {
+        "**/node_modules": true,
+        "**/build": true
+    },
+    "cmake.sourceDirectory": "C:/LTTBDD/khonggiandienthoai/linux"
+}

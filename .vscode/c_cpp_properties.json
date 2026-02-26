@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/linux/flutter/ephemeral",
+                "${workspaceFolder}/linux/flutter/ephemeral/flutter_linux/include",
+                "${workspaceFolder}/linux/flutter/ephemeral/.plugin_symlinks/file_selector_linux/linux/include",
+                "${workspaceFolder}/linux/flutter/ephemeral/.plugin_symlinks/image_picker_linux/linux/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
