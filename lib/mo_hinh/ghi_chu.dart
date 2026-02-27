@@ -2,6 +2,7 @@ enum LoaiNoiDung { text, image, video, mix }
 
 class GhiChu {
   final String id;
+  final String tieuDe;
   final String noiDung;
 
   final List<String> hinhAnhPaths;
@@ -12,6 +13,7 @@ class GhiChu {
 
   GhiChu({
     required this.id,
+    required this.tieuDe,
     required this.noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
@@ -20,6 +22,8 @@ class GhiChu {
   }) : hinhAnhPaths = List.unmodifiable(hinhAnhPaths ?? []),
        videoPaths = List.unmodifiable(videoPaths ?? []),
        thoiGianTao = thoiGianTao ?? DateTime.now();
+
+  // ===================== CHECK MEDIA =====================
 
   bool get coAnh => hinhAnhPaths.isNotEmpty;
   bool get coVideo => videoPaths.isNotEmpty;
@@ -31,6 +35,8 @@ class GhiChu {
     return LoaiNoiDung.text;
   }
 
+  // ===================== FORMAT TIME =====================
+
   String get thoiGianFormatted {
     String p(int n) => n.toString().padLeft(2, '0');
 
@@ -38,13 +44,17 @@ class GhiChu {
         "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
   }
 
+  // ===================== COPY =====================
+
   GhiChu copyWith({
+    String? tieuDe,
     String? noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
   }) {
     return GhiChu(
       id: id,
+      tieuDe: tieuDe ?? this.tieuDe,
       noiDung: noiDung ?? this.noiDung,
       hinhAnhPaths: hinhAnhPaths ?? this.hinhAnhPaths,
       videoPaths: videoPaths ?? this.videoPaths,
@@ -53,9 +63,12 @@ class GhiChu {
     );
   }
 
+  // ===================== MAP =====================
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'tieuDe': tieuDe,
       'noiDung': noiDung,
       'hinhAnhPaths': hinhAnhPaths,
       'videoPaths': videoPaths,
@@ -67,6 +80,7 @@ class GhiChu {
   factory GhiChu.fromMap(Map<String, dynamic> map) {
     return GhiChu(
       id: map['id'] ?? '',
+      tieuDe: map['tieuDe'] ?? '',
       noiDung: map['noiDung'] ?? '',
       hinhAnhPaths: List<String>.from(map['hinhAnhPaths'] ?? []),
       videoPaths: List<String>.from(map['videoPaths'] ?? []),
