@@ -71,7 +71,7 @@ class CongViec {
     return {
       'id': id,
       'tieuDe': tieuDe,
-      'daHoanThanh': daHoanThanh,
+      'daHoanThanh': daHoanThanh ? 1 : 0, // đổi bool -> int
       'thoiGianTao': thoiGianTao.toIso8601String(),
       'thoiGianHen': thoiGianHen?.toIso8601String(),
     };
@@ -81,7 +81,7 @@ class CongViec {
     return CongViec(
       id: map['id'] ?? '',
       tieuDe: map['tieuDe'] ?? '',
-      daHoanThanh: map['daHoanThanh'] ?? false,
+      daHoanThanh: map['daHoanThanh'] == 1, // đổi int -> bool
       thoiGianTao:
           DateTime.tryParse(map['thoiGianTao'] ?? '') ?? DateTime.now(),
       thoiGianHen: map['thoiGianHen'] != null
