@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:uuid/uuid.dart';
 import '../mo_hinh/cong_viec.dart';
+import '../database/database_helper.dart';
 
 class KhongGianLamViec extends StatefulWidget {
   const KhongGianLamViec({super.key});
@@ -11,15 +13,24 @@ class KhongGianLamViec extends StatefulWidget {
 
 class _KhongGianLamViecState extends State<KhongGianLamViec> {
   final List<CongViec> danhSach = [];
+  final uuid = const Uuid();
   Timer? timer;
 
   @override
   void initState() {
     super.initState();
+    _loadData();
+
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        setState(() {});
-      }
+      if (mounted) setState(() {});
+    });
+  }
+
+  Future<void> _loadData() async {
+    final data = await DatabaseHelper.instance.getAllCongViec();
+    setState(() {
+      danhSach.clear();
+      danhSach.addAll(data);
     });
   }
 
@@ -27,11 +38,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   void dispose() {
     timer?.cancel();
     super.dispose();
-  }
-
-  // ================= ID TỰ SINH =================
-  String _taoId() {
-    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   // ================= THÊM / SỬA =================
@@ -115,25 +121,27 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                   child: const Text("Hủy"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (controller.text.isEmpty) return;
 
-                    setState(() {
-                      if (index == null) {
-                        danhSach.add(
-                          CongViec(
-                            id: _taoId(),
-                            tieuDe: controller.text,
-                            thoiGianHen: selectedDate,
-                          ),
-                        );
-                      } else {
-                        danhSach[index].capNhatTieuDe(controller.text);
-                        danhSach[index].capNhatHenGio(selectedDate);
-                      }
-                    });
+                    if (index == null) {
+                      final cv = CongViec(
+                        id: uuid.v4(),
+                        tieuDe: controller.text,
+                        thoiGianHen: selectedDate,
+                      );
+
+                      await DatabaseHelper.instance.insertCongViec(cv);
+                    } else {
+                      final cv = danhSach[index];
+                      cv.capNhatTieuDe(controller.text);
+                      cv.capNhatHenGio(selectedDate);
+
+                      await DatabaseHelper.instance.updateCongViec(cv);
+                    }
 
                     Navigator.pop(context);
+                    _loadData();
                   },
                   child: const Text("Lưu"),
                 ),
@@ -145,19 +153,23 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     );
   }
 
-  // ================= XỬ LÝ =================
-  void _xoa(int index) {
-    setState(() {
-      danhSach.removeAt(index);
-    });
+  // ================= XÓA =================
+  void _xoa(int index) async {
+    await DatabaseHelper.instance.deleteCongViec(danhSach[index].id);
+
+    _loadData();
   }
 
-  void _toggle(int index) {
-    setState(() {
-      danhSach[index].toggleHoanThanh();
-    });
+  // ================= TOGGLE =================
+  void _toggle(int index) async {
+    final cv = danhSach[index];
+    cv.toggleHoanThanh();
+
+    await DatabaseHelper.instance.updateCongViec(cv);
+    _loadData();
   }
 
+  // ================= ĐẾM NGƯỢC =================
   String _thoiGianConLai(DateTime thoiGian) {
     Duration diff = thoiGian.difference(DateTime.now());
 
