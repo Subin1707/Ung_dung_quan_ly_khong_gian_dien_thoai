@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum LoaiNoiDung { text, image, video, mix }
 
 class GhiChu {
@@ -23,7 +25,7 @@ class GhiChu {
        videoPaths = List.unmodifiable(videoPaths ?? []),
        thoiGianTao = thoiGianTao ?? DateTime.now();
 
-  // ===================== CHECK MEDIA =====================
+  // ================= CHECK MEDIA =================
 
   bool get coAnh => hinhAnhPaths.isNotEmpty;
   bool get coVideo => videoPaths.isNotEmpty;
@@ -35,7 +37,7 @@ class GhiChu {
     return LoaiNoiDung.text;
   }
 
-  // ===================== FORMAT TIME =====================
+  // ================= FORMAT TIME =================
 
   String get thoiGianFormatted {
     String p(int n) => n.toString().padLeft(2, '0');
@@ -44,7 +46,7 @@ class GhiChu {
         "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
   }
 
-  // ===================== COPY =====================
+  // ================= COPY =================
 
   GhiChu copyWith({
     String? tieuDe,
@@ -63,15 +65,15 @@ class GhiChu {
     );
   }
 
-  // ===================== MAP =====================
+  // ================= SQLITE MAP =================
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'tieuDe': tieuDe,
       'noiDung': noiDung,
-      'hinhAnhPaths': hinhAnhPaths,
-      'videoPaths': videoPaths,
+      'hinhAnhPaths': jsonEncode(hinhAnhPaths), // convert list -> json
+      'videoPaths': jsonEncode(videoPaths), // convert list -> json
       'thoiGianTao': thoiGianTao.toIso8601String(),
       'thoiGianCapNhat': thoiGianCapNhat?.toIso8601String(),
     };
@@ -82,8 +84,12 @@ class GhiChu {
       id: map['id'] ?? '',
       tieuDe: map['tieuDe'] ?? '',
       noiDung: map['noiDung'] ?? '',
-      hinhAnhPaths: List<String>.from(map['hinhAnhPaths'] ?? []),
-      videoPaths: List<String>.from(map['videoPaths'] ?? []),
+      hinhAnhPaths: map['hinhAnhPaths'] != null
+          ? List<String>.from(jsonDecode(map['hinhAnhPaths']))
+          : [],
+      videoPaths: map['videoPaths'] != null
+          ? List<String>.from(jsonDecode(map['videoPaths']))
+          : [],
       thoiGianTao:
           DateTime.tryParse(map['thoiGianTao'] ?? '') ?? DateTime.now(),
       thoiGianCapNhat: map['thoiGianCapNhat'] != null
