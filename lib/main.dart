@@ -7,6 +7,8 @@ void main() {
 }
 
 class UngDungKhongGian extends StatelessWidget {
+  const UngDungKhongGian({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

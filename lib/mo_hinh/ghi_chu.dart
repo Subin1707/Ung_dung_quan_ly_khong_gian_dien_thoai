@@ -32,7 +32,7 @@ class GhiChu {
   }
 
   String get thoiGianFormatted {
-    final p = (int n) => n.toString().padLeft(2, '0');
+    String p(int n) => n.toString().padLeft(2, '0');
 
     return "${p(thoiGianTao.day)}/${p(thoiGianTao.month)}/${thoiGianTao.year} "
         "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";

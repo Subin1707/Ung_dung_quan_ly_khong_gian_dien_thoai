@@ -76,7 +76,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         final images = await _picker.pickMultiImage(
                           imageQuality: 80,
                         );
-                        if (images == null || images.isEmpty) return;
+                        if (images.isEmpty) return;
 
                         setStateDialog(() {
                           selectedImages = images.map((e) => e.path).toList();
