@@ -1,3 +1,5 @@
+enum TrangThaiCongViec { chuaHoanThanh, daHoanThanh }
+
 class CongViec {
   final String id;
   String tieuDe;
@@ -13,6 +15,8 @@ class CongViec {
     this.thoiGianHen,
   }) : thoiGianTao = thoiGianTao ?? DateTime.now();
 
+  // ================= TOGGLE =================
+
   void toggleHoanThanh() {
     daHoanThanh = !daHoanThanh;
   }
@@ -23,5 +27,66 @@ class CongViec {
 
   void capNhatHenGio(DateTime? thoiGianMoi) {
     thoiGianHen = thoiGianMoi;
+  }
+
+  // ================= GETTER =================
+
+  TrangThaiCongViec get trangThai => daHoanThanh
+      ? TrangThaiCongViec.daHoanThanh
+      : TrangThaiCongViec.chuaHoanThanh;
+
+  String get thoiGianTaoFormatted {
+    String p(int n) => n.toString().padLeft(2, '0');
+    return "${p(thoiGianTao.day)}/${p(thoiGianTao.month)}/${thoiGianTao.year} "
+        "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
+  }
+
+  String? get thoiGianHenFormatted {
+    if (thoiGianHen == null) return null;
+
+    String p(int n) => n.toString().padLeft(2, '0');
+    return "${p(thoiGianHen!.day)}/${p(thoiGianHen!.month)}/${thoiGianHen!.year} "
+        "${p(thoiGianHen!.hour)}:${p(thoiGianHen!.minute)}";
+  }
+
+  // ================= COPY =================
+
+  CongViec copyWith({
+    String? tieuDe,
+    bool? daHoanThanh,
+    DateTime? thoiGianHen,
+  }) {
+    return CongViec(
+      id: id,
+      tieuDe: tieuDe ?? this.tieuDe,
+      daHoanThanh: daHoanThanh ?? this.daHoanThanh,
+      thoiGianTao: thoiGianTao,
+      thoiGianHen: thoiGianHen ?? this.thoiGianHen,
+    );
+  }
+
+  // ================= MAP =================
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'tieuDe': tieuDe,
+      'daHoanThanh': daHoanThanh,
+      'thoiGianTao': thoiGianTao.toIso8601String(),
+      'thoiGianHen': thoiGianHen?.toIso8601String(),
+    };
+  }
+
+  factory CongViec.fromMap(Map<String, dynamic> map) {
+    return CongViec(
+      id: map['id'] ?? '',
+      tieuDe: map['tieuDe'] ?? '',
+      daHoanThanh: map['daHoanThanh'] ?? false,
+      thoiGianTao:
+          DateTime.tryParse(map['thoiGianTao'] ?? '') ?? DateTime.now(),
+      thoiGianHen: map['thoiGianHen'] != null
+          ? DateTime.tryParse(map['thoiGianHen'])
+          : null,
+    );
   }
 }
