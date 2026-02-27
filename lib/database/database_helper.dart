@@ -3,16 +3,22 @@ import 'package:path/path.dart';
 import '../mo_hinh/cong_viec.dart';
 
 class DatabaseHelper {
-  static final DatabaseHelper instance = DatabaseHelper._init();
+  // ================= SINGLETON =================
+
+  static final DatabaseHelper instance = DatabaseHelper._internal();
   static Database? _database;
 
-  DatabaseHelper._init();
+  DatabaseHelper._internal();
+
+  // ================= GET DATABASE =================
 
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB('khong_gian.db');
     return _database!;
   }
+
+  // ================= INIT DB =================
 
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
@@ -21,35 +27,66 @@ class DatabaseHelper {
     return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
-  Future _createDB(Database db, int version) async {
+  // ================= CREATE TABLE =================
+
+  Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE cong_viec (
         id TEXT PRIMARY KEY,
-        tieuDe TEXT,
-        daHoanThanh INTEGER,
-        thoiGianTao TEXT,
+        tieuDe TEXT NOT NULL,
+        daHoanThanh INTEGER NOT NULL,
+        thoiGianTao TEXT NOT NULL,
         thoiGianHen TEXT
       )
     ''');
   }
 
-  // ================= CRUD =================
+  // ================= INSERT =================
 
-  Future<void> insertCongViec(CongViec congViec) async {
+  Future<int> insertCongViec(CongViec congViec) async {
     final db = await instance.database;
-    await db.insert('cong_viec', congViec.toMap());
+
+    return await db.insert(
+      'cong_viec',
+      congViec.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
+
+  // ================= GET ALL =================
 
   Future<List<CongViec>> getAllCongViec() async {
     final db = await instance.database;
-    final result = await db.query('cong_viec');
+
+    final result = await db.query('cong_viec', orderBy: 'thoiGianTao DESC');
 
     return result.map((e) => CongViec.fromMap(e)).toList();
   }
 
-  Future<void> updateCongViec(CongViec congViec) async {
+  // ================= GET BY ID =================
+
+  Future<CongViec?> getCongViecById(String id) async {
     final db = await instance.database;
-    await db.update(
+
+    final result = await db.query(
+      'cong_viec',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    if (result.isNotEmpty) {
+      return CongViec.fromMap(result.first);
+    }
+    return null;
+  }
+
+  // ================= UPDATE =================
+
+  Future<int> updateCongViec(CongViec congViec) async {
+    final db = await instance.database;
+
+    return await db.update(
       'cong_viec',
       congViec.toMap(),
       where: 'id = ?',
@@ -57,8 +94,25 @@ class DatabaseHelper {
     );
   }
 
-  Future<void> deleteCongViec(String id) async {
+  // ================= DELETE =================
+
+  Future<int> deleteCongViec(String id) async {
     final db = await instance.database;
-    await db.delete('cong_viec', where: 'id = ?', whereArgs: [id]);
+
+    return await db.delete('cong_viec', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ================= DELETE ALL =================
+
+  Future<void> deleteAllCongViec() async {
+    final db = await instance.database;
+    await db.delete('cong_viec');
+  }
+
+  // ================= CLOSE DB =================
+
+  Future<void> close() async {
+    final db = await instance.database;
+    db.close();
   }
 }
