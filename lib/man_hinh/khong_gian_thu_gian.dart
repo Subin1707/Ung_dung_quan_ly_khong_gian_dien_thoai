@@ -118,9 +118,9 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
       "poster": "assets/hinh_anh/sach/truyenkieu.jpg",
     },
     {
-      "ten": "Những người cùng khổ",
-      "file": "assets/sach/Những Người Khốn Khổ Victor Hugo.txt",
-      "poster": "assets/hinh_anh/sach/nhungconnguoicungkho.jpg",
+      "ten": "Hầu trời",
+      "file": "assets/sach/Hầu trời.txt",
+      "poster": "assets/hinh_anh/sach/Hầu trời.jpg",
     },
   ];
 
