@@ -120,7 +120,7 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     {
       "ten": "Hầu trời",
       "file": "assets/sach/Hầu trời.txt",
-      "poster": "assets/hinh_anh/sach/Hầu trời.jpg",
+      "poster": "assets/hinh_anh/sach/hautroi.jpg",
     },
   ];
 
