@@ -32,18 +32,23 @@ class _UngDungKhongGianState extends State<UngDungKhongGian> {
       darkTheme: ChuDeUngDung.toi,
       themeMode: ThemeMode.system,
 
+      // ================= NGÔN NGỮ =================
       locale: _locale,
+
       supportedLocales: const [
         Locale('vi'),
         Locale('en'),
       ],
+
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      home: TrangChu(onChangeLanguage: doiNgonNgu),
+      home: TrangChu(
+        onChangeLanguage: doiNgonNgu,
+      ),
     );
   }
 }
