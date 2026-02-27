@@ -17,7 +17,9 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   void initState() {
     super.initState();
     timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -33,7 +35,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   }
 
   // ================= THÊM / SỬA =================
-
   void _moHopThoai({int? index}) {
     TextEditingController controller = TextEditingController(
       text: index != null ? danhSach[index].tieuDe : "",
@@ -47,6 +48,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
+              scrollable: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -68,7 +70,9 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                         child: Text(
                           selectedDate == null
                               ? "Chưa hẹn giờ"
-                              : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - ${selectedDate!.hour}:${selectedDate!.minute.toString().padLeft(2, '0')}",
+                              : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - "
+                                    "${selectedDate!.hour.toString().padLeft(2, '0')}:"
+                                    "${selectedDate!.minute.toString().padLeft(2, '0')}",
                         ),
                       ),
                       IconButton(
@@ -76,7 +80,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                         onPressed: () async {
                           DateTime? date = await showDatePicker(
                             context: context,
-                            initialDate: DateTime.now(),
+                            initialDate: selectedDate ?? DateTime.now(),
                             firstDate: DateTime(2020),
                             lastDate: DateTime(2100),
                           );
@@ -142,7 +146,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   }
 
   // ================= XỬ LÝ =================
-
   void _xoa(int index) {
     setState(() {
       danhSach.removeAt(index);
@@ -170,7 +173,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   }
 
   // ================= UI =================
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,10 +187,9 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
               itemBuilder: (context, index) {
                 final congViec = danhSach[index];
 
-                bool hetHan = false;
-                if (congViec.thoiGianHen != null) {
-                  hetHan = congViec.thoiGianHen!.isBefore(DateTime.now());
-                }
+                bool hetHan =
+                    congViec.thoiGianHen != null &&
+                    congViec.thoiGianHen!.isBefore(DateTime.now());
 
                 return Card(
                   margin: const EdgeInsets.all(12),
