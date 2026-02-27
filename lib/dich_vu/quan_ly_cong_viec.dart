@@ -1,40 +1,59 @@
 import '../mo_hinh/cong_viec.dart';
+import '../database/database_helper.dart';
 
 class QuanLyCongViec {
   final List<CongViec> _danhSach = [];
 
-  // ================= GET LIST =================
-
   List<CongViec> get danhSach => List.unmodifiable(_danhSach);
 
-  String _taoId() => DateTime.now().millisecondsSinceEpoch.toString();
+  // ================= LOAD DATABASE =================
+
+  Future<void> loadDuLieu() async {
+    final data = await DatabaseHelper.instance.getAllCongViec();
+    _danhSach
+      ..clear()
+      ..addAll(data);
+  }
 
   // ================= THÊM =================
 
-  void themCongViec(String tieuDe, {DateTime? thoiGianHen}) {
-    _danhSach.add(
-      CongViec(id: _taoId(), tieuDe: tieuDe, thoiGianHen: thoiGianHen),
+  Future<void> themCongViec(String tieuDe, {DateTime? thoiGianHen}) async {
+    final congViec = CongViec(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      tieuDe: tieuDe,
+      thoiGianHen: thoiGianHen,
     );
+
+    await DatabaseHelper.instance.insertCongViec(congViec);
+    _danhSach.add(congViec);
   }
 
   // ================= XÓA =================
 
-  void xoaCongViec(String id) {
+  Future<void> xoaCongViec(String id) async {
+    await DatabaseHelper.instance.deleteCongViec(id);
     _danhSach.removeWhere((cv) => cv.id == id);
   }
 
   // ================= TOGGLE =================
 
-  void toggleHoanThanh(String id) {
+  Future<void> toggleHoanThanh(String id) async {
     final index = _danhSach.indexWhere((e) => e.id == id);
     if (index == -1) return;
 
-    _danhSach[index].toggleHoanThanh();
+    final cv = _danhSach[index];
+    cv.toggleHoanThanh();
+
+    await DatabaseHelper.instance.updateCongViec(cv);
   }
 
   // ================= CẬP NHẬT =================
 
-  void capNhatCongViec(String id, {String? tieuDe, DateTime? thoiGianHen}) {
+  Future<void> capNhatCongViec(
+    String id, {
+    String? tieuDe,
+    DateTime? thoiGianHen,
+  }) async {
     final index = _danhSach.indexWhere((e) => e.id == id);
     if (index == -1) return;
 
@@ -45,6 +64,8 @@ class QuanLyCongViec {
     }
 
     cv.capNhatHenGio(thoiGianHen);
+
+    await DatabaseHelper.instance.updateCongViec(cv);
   }
 
   // ================= TÌM KIẾM =================
