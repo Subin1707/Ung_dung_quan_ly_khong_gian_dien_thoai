@@ -46,13 +46,14 @@ class GhiChu {
         "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
   }
 
-  // ================= COPY =================
+  // ================= COPY WITH (FIX LỖI Ở ĐÂY) =================
 
   GhiChu copyWith({
     String? tieuDe,
     String? noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
+    DateTime? thoiGianCapNhat, // 👈 thêm tham số
   }) {
     return GhiChu(
       id: id,
@@ -61,7 +62,7 @@ class GhiChu {
       hinhAnhPaths: hinhAnhPaths ?? this.hinhAnhPaths,
       videoPaths: videoPaths ?? this.videoPaths,
       thoiGianTao: thoiGianTao,
-      thoiGianCapNhat: DateTime.now(),
+      thoiGianCapNhat: thoiGianCapNhat ?? this.thoiGianCapNhat,
     );
   }
 
@@ -72,8 +73,8 @@ class GhiChu {
       'id': id,
       'tieuDe': tieuDe,
       'noiDung': noiDung,
-      'hinhAnhPaths': jsonEncode(hinhAnhPaths), // convert list -> json
-      'videoPaths': jsonEncode(videoPaths), // convert list -> json
+      'hinhAnhPaths': jsonEncode(hinhAnhPaths),
+      'videoPaths': jsonEncode(videoPaths),
       'thoiGianTao': thoiGianTao.toIso8601String(),
       'thoiGianCapNhat': thoiGianCapNhat?.toIso8601String(),
     };
@@ -84,10 +85,13 @@ class GhiChu {
       id: map['id'] ?? '',
       tieuDe: map['tieuDe'] ?? '',
       noiDung: map['noiDung'] ?? '',
-      hinhAnhPaths: map['hinhAnhPaths'] != null
+      hinhAnhPaths:
+          map['hinhAnhPaths'] != null &&
+              map['hinhAnhPaths'].toString().isNotEmpty
           ? List<String>.from(jsonDecode(map['hinhAnhPaths']))
           : [],
-      videoPaths: map['videoPaths'] != null
+      videoPaths:
+          map['videoPaths'] != null && map['videoPaths'].toString().isNotEmpty
           ? List<String>.from(jsonDecode(map['videoPaths']))
           : [],
       thoiGianTao:

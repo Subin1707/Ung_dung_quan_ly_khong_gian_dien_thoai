@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:permission_handler/permission_handler.dart';
+
 import '../mo_hinh/ghi_chu.dart';
+import '../database/database_helper.dart';
 
 class KhongGianCaNhan extends StatefulWidget {
   const KhongGianCaNhan({super.key});
@@ -13,12 +15,26 @@ class KhongGianCaNhan extends StatefulWidget {
 }
 
 class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
-  final List<GhiChu> danhSach = [];
+  List<GhiChu> danhSach = [];
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  // ================= LOAD DATA =================
+  Future<void> _loadData() async {
+    final data = await DatabaseHelper.instance.getAllGhiChu();
+    setState(() {
+      danhSach = data;
+    });
+  }
 
   String _taoId() => DateTime.now().millisecondsSinceEpoch.toString();
 
-  // ================= PERMISSION FIX =================
+  // ================= PERMISSION =================
   Future<bool> _xinQuyenMedia() async {
     if (!Platform.isAndroid) return true;
 
@@ -33,7 +49,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
     return images.isGranted && videos.isGranted;
   }
 
-  // ================= THÊM KỶ NIỆM =================
+  // ================= THÊM =================
   void _themKyNiem() {
     TextEditingController tieuDeController = TextEditingController();
     TextEditingController noiDungController = TextEditingController();
@@ -52,111 +68,66 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                 borderRadius: BorderRadius.circular(20),
               ),
               title: const Text("Thêm kỷ niệm"),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: tieuDeController,
-                      decoration: const InputDecoration(
-                        labelText: "Tiêu đề",
-                        border: OutlineInputBorder(),
-                      ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: tieuDeController,
+                    decoration: const InputDecoration(
+                      labelText: "Tiêu đề",
+                      border: OutlineInputBorder(),
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: noiDungController,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        labelText: "Nội dung",
-                        border: OutlineInputBorder(),
-                      ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: noiDungController,
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                      labelText: "Nội dung",
+                      border: OutlineInputBorder(),
                     ),
-                    const SizedBox(height: 15),
+                  ),
+                  const SizedBox(height: 12),
 
-                    // ===== CHỌN ẢNH =====
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.image),
-                      label: const Text("Chọn nhiều ảnh"),
-                      onPressed: () async {
-                        bool duocPhep = await _xinQuyenMedia();
-                        if (!duocPhep) return;
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.image),
+                    label: const Text("Chọn ảnh"),
+                    onPressed: () async {
+                      bool duocPhep = await _xinQuyenMedia();
+                      if (!duocPhep) return;
 
-                        final images = await _picker.pickMultiImage(
-                          imageQuality: 80,
-                        );
+                      final images = await _picker.pickMultiImage(
+                        imageQuality: 80,
+                      );
+                      if (images.isEmpty) return;
 
-                        if (images.isEmpty) return;
+                      setStateDialog(() {
+                        selectedImages = images.map((e) => e.path).toList();
+                      });
+                    },
+                  ),
 
-                        setStateDialog(() {
-                          selectedImages = images.map((e) => e.path).toList();
-                        });
-                      },
-                    ),
+                  const SizedBox(height: 10),
 
-                    const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.video_library),
+                    label: const Text("Chọn video"),
+                    onPressed: () async {
+                      bool duocPhep = await _xinQuyenMedia();
+                      if (!duocPhep) return;
 
-                    // ===== CHỌN VIDEO =====
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.video_library),
-                      label: const Text("Chọn video"),
-                      onPressed: () async {
-                        bool duocPhep = await _xinQuyenMedia();
-                        if (!duocPhep) return;
+                      final video = await _picker.pickVideo(
+                        source: ImageSource.gallery,
+                      );
 
-                        final video = await _picker.pickVideo(
-                          source: ImageSource.gallery,
-                        );
+                      if (video == null) return;
 
-                        if (video == null) return;
-
-                        setStateDialog(() {
-                          selectedVideos.add(video.path);
-                        });
-                      },
-                    ),
-
-                    const SizedBox(height: 15),
-
-                    if (selectedImages.isNotEmpty)
-                      SizedBox(
-                        height: 100,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: selectedImages.length,
-                          itemBuilder: (_, index) {
-                            final file = File(selectedImages[index]);
-                            return Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.file(
-                                  file,
-                                  width: 100,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) =>
-                                      const Icon(Icons.broken_image),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                    if (selectedVideos.isNotEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 10),
-                        child: Icon(
-                          Icons.movie,
-                          size: 50,
-                          color: Colors.deepPurple,
-                        ),
-                      ),
-                  ],
-                ),
+                      setStateDialog(() {
+                        selectedVideos.add(video.path);
+                      });
+                    },
+                  ),
+                ],
               ),
               actions: [
                 TextButton(
@@ -164,22 +135,25 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                   child: const Text("Hủy"),
                 ),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (tieuDeController.text.isEmpty ||
                         noiDungController.text.isEmpty)
                       return;
 
-                    setState(() {
-                      danhSach.add(
-                        GhiChu(
-                          id: _taoId(),
-                          tieuDe: tieuDeController.text,
-                          noiDung: noiDungController.text,
-                          hinhAnhPaths: selectedImages,
-                          videoPaths: selectedVideos,
-                        ),
-                      );
-                    });
+                    final now = DateTime.now();
+
+                    final ghiChu = GhiChu(
+                      id: _taoId(),
+                      tieuDe: tieuDeController.text,
+                      noiDung: noiDungController.text,
+                      hinhAnhPaths: selectedImages,
+                      videoPaths: selectedVideos,
+                      thoiGianTao: now,
+                      thoiGianCapNhat: now,
+                    );
+
+                    await DatabaseHelper.instance.insertGhiChu(ghiChu);
+                    await _loadData();
 
                     Navigator.pop(context);
                   },
@@ -193,39 +167,10 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
     );
   }
 
-  // ================= XEM ẢNH =================
-  void _xemAnh(File file) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: Colors.black,
-          appBar: AppBar(backgroundColor: Colors.black),
-          body: Center(
-            child: InteractiveViewer(
-              child: Image.file(
-                file,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.broken_image, color: Colors.white),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _xemVideo(String path) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => VideoScreen(path: path)),
-    );
-  }
-
-  void _xoa(int index) {
-    setState(() {
-      danhSach.removeAt(index);
-    });
+  // ================= XOÁ =================
+  Future<void> _xoa(String id) async {
+    await DatabaseHelper.instance.deleteGhiChu(id);
+    await _loadData();
   }
 
   // ================= UI =================
@@ -263,10 +208,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          ghiChu.noiDung,
-                          style: const TextStyle(fontSize: 15),
-                        ),
+                        Text(ghiChu.noiDung),
                         const SizedBox(height: 6),
                         Text(
                           ghiChu.thoiGianFormatted,
@@ -279,7 +221,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                         if (ghiChu.coAnh)
                           SizedBox(
-                            height: 200,
+                            height: 120,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: ghiChu.hinhAnhPaths.length,
@@ -287,17 +229,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                                 final file = File(ghiChu.hinhAnhPaths[i]);
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
-                                  child: GestureDetector(
-                                    onTap: () => _xemAnh(file),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(15),
-                                      child: Image.file(
-                                        file,
-                                        width: 200,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
+                                  child: Image.file(file, width: 120),
                                 );
                               },
                             ),
@@ -310,10 +242,10 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                                   (v) => IconButton(
                                     icon: const Icon(
                                       Icons.play_circle,
-                                      size: 60,
+                                      size: 50,
                                       color: Colors.deepPurple,
                                     ),
-                                    onPressed: () => _xemVideo(v),
+                                    onPressed: () {},
                                   ),
                                 )
                                 .toList(),
@@ -323,7 +255,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                           alignment: Alignment.centerRight,
                           child: IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _xoa(index),
+                            onPressed: () => _xoa(ghiChu.id),
                           ),
                         ),
                       ],
@@ -333,63 +265,8 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
               },
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.deepPurple,
         onPressed: _themKyNiem,
         child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-
-// ================= VIDEO SCREEN =================
-class VideoScreen extends StatefulWidget {
-  final String path;
-  const VideoScreen({super.key, required this.path});
-
-  @override
-  State<VideoScreen> createState() => _VideoScreenState();
-}
-
-class _VideoScreenState extends State<VideoScreen> {
-  late VideoPlayerController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = VideoPlayerController.file(File(widget.path))
-      ..initialize().then((_) {
-        if (mounted) setState(() {});
-      });
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.black),
-      body: Center(
-        child: controller.value.isInitialized
-            ? AspectRatio(
-                aspectRatio: controller.value.aspectRatio,
-                child: VideoPlayer(controller),
-              )
-            : const CircularProgressIndicator(),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            controller.value.isPlaying ? controller.pause() : controller.play();
-          });
-        },
-        child: Icon(
-          controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
       ),
     );
   }

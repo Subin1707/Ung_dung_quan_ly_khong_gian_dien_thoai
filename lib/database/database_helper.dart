@@ -5,7 +5,6 @@ import '../mo_hinh/ghi_chu.dart';
 
 class DatabaseHelper {
   // ================= SINGLETON =================
-
   static final DatabaseHelper instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -15,15 +14,13 @@ class DatabaseHelper {
   DatabaseHelper._internal();
 
   // ================= GET DATABASE =================
-
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB();
     return _database!;
   }
 
-  // ================= INIT DB =================
-
+  // ================= INIT DATABASE =================
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
@@ -37,11 +34,9 @@ class DatabaseHelper {
   }
 
   // ================= CREATE TABLE =================
-
   Future<void> _createDB(Database db, int version) async {
-    // ===== Bảng công việc =====
     await db.execute('''
-      CREATE TABLE cong_viec (
+      CREATE TABLE IF NOT EXISTS cong_viec (
         id TEXT PRIMARY KEY,
         tieuDe TEXT NOT NULL,
         daHoanThanh INTEGER NOT NULL,
@@ -50,13 +45,8 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.execute(
-      'CREATE INDEX idx_cong_viec_tao ON cong_viec(thoiGianTao)',
-    );
-
-    // ===== Bảng ghi chú =====
     await db.execute('''
-      CREATE TABLE ghi_chu (
+      CREATE TABLE IF NOT EXISTS ghi_chu (
         id TEXT PRIMARY KEY,
         tieuDe TEXT NOT NULL,
         noiDung TEXT NOT NULL,
@@ -67,15 +57,19 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.execute('CREATE INDEX idx_ghi_chu_tao ON ghi_chu(thoiGianTao)');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_cong_viec_tao ON cong_viec(thoiGianTao)',
+    );
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ghi_chu_tao ON ghi_chu(thoiGianTao)',
+    );
   }
 
   // ================= ON UPGRADE =================
-
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('''
-        CREATE TABLE ghi_chu (
+        CREATE TABLE IF NOT EXISTS ghi_chu (
           id TEXT PRIMARY KEY,
           tieuDe TEXT NOT NULL,
           noiDung TEXT NOT NULL,
@@ -88,9 +82,9 @@ class DatabaseHelper {
     }
   }
 
-  // ============================================================
-  // ===================== CRUD CONG VIEC =======================
-  // ============================================================
+  // ==========================================================
+  // ===================== CONG VIEC ==========================
+  // ==========================================================
 
   Future<int> insertCongViec(CongViec congViec) async {
     final db = await database;
@@ -105,6 +99,17 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.query('cong_viec', orderBy: 'thoiGianTao DESC');
     return result.map((e) => CongViec.fromMap(e)).toList();
+  }
+
+  Future<CongViec?> getCongViecById(String id) async {
+    final db = await database;
+    final result = await db.query(
+      'cong_viec',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return result.isNotEmpty ? CongViec.fromMap(result.first) : null;
   }
 
   Future<int> updateCongViec(CongViec congViec) async {
@@ -122,9 +127,14 @@ class DatabaseHelper {
     return await db.delete('cong_viec', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ============================================================
-  // ======================= CRUD GHI CHU =======================
-  // ============================================================
+  Future<void> clearCongViec() async {
+    final db = await database;
+    await db.delete('cong_viec');
+  }
+
+  // ==========================================================
+  // ======================= GHI CHU ==========================
+  // ==========================================================
 
   Future<int> insertGhiChu(GhiChu ghiChu) async {
     final db = await database;
@@ -139,6 +149,17 @@ class DatabaseHelper {
     final db = await database;
     final result = await db.query('ghi_chu', orderBy: 'thoiGianTao DESC');
     return result.map((e) => GhiChu.fromMap(e)).toList();
+  }
+
+  Future<GhiChu?> getGhiChuById(String id) async {
+    final db = await database;
+    final result = await db.query(
+      'ghi_chu',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    return result.isNotEmpty ? GhiChu.fromMap(result.first) : null;
   }
 
   Future<int> updateGhiChu(GhiChu ghiChu) async {
@@ -156,18 +177,28 @@ class DatabaseHelper {
     return await db.delete('ghi_chu', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ================= DELETE ALL =================
-
-  Future<void> deleteAllData() async {
+  Future<void> clearGhiChu() async {
     final db = await database;
-    await db.delete('cong_viec');
     await db.delete('ghi_chu');
   }
 
-  // ================= CLOSE =================
+  // ==========================================================
+  // ======================= RESET ALL ========================
+  // ==========================================================
 
-  Future<void> close() async {
+  Future<void> deleteAllData() async {
     final db = await database;
-    await db.close();
+    await db.transaction((txn) async {
+      await txn.delete('cong_viec');
+      await txn.delete('ghi_chu');
+    });
+  }
+
+  // ================= CLOSE =================
+  Future<void> close() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
   }
 }
