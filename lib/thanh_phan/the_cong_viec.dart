@@ -16,7 +16,8 @@ class TheCongViec extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final quaHan =
+    final bool quaHan =
+        congViec.thoiGianHen != null &&
         DinhDangThoiGian.daQuaHan(congViec.thoiGianHen) &&
         !congViec.daHoanThanh;
 
@@ -25,12 +26,17 @@ class TheCongViec extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
+        color: quaHan ? Colors.red.withOpacity(0.05) : Colors.white,
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, 3)),
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
         ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Checkbox(
             value: congViec.daHoanThanh,
@@ -51,6 +57,7 @@ class TheCongViec extends StatelessWidget {
                         : null,
                   ),
                 ),
+
                 const SizedBox(height: 4),
 
                 Text(
@@ -64,6 +71,8 @@ class TheCongViec extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       color: quaHan ? Colors.red : Colors.grey[700],
+                      fontWeight:
+                          quaHan ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
               ],
