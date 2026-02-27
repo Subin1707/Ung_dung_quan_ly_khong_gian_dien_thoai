@@ -7,7 +7,9 @@ import 'khong_gian_ca_nhan.dart';
 import 'thong_tin_nhom.dart';
 
 class TrangChu extends StatefulWidget {
-  const TrangChu({super.key});
+  final Function(String) onChangeLanguage;
+
+  const TrangChu({super.key, required this.onChangeLanguage});
 
   @override
   State<TrangChu> createState() => _TrangChuState();
@@ -23,7 +25,7 @@ class _TrangChuState extends State<TrangChu> {
     _controller = VideoPlayerController.asset("assets/video/nentrangchu.mp4")
       ..initialize().then((_) {
         _controller.setLooping(true);
-        _controller.setVolume(0); // tắt âm thanh
+        _controller.setVolume(0);
         _controller.play();
         setState(() {});
       });
@@ -35,13 +37,16 @@ class _TrangChuState extends State<TrangChu> {
     super.dispose();
   }
 
+  String getText(BuildContext context, String vi, String en) {
+    return Localizations.localeOf(context).languageCode == 'vi' ? vi : en;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // 🎬 Video nền
           if (_controller.value.isInitialized)
             SizedBox.expand(
               child: FittedBox(
@@ -54,18 +59,43 @@ class _TrangChuState extends State<TrangChu> {
               ),
             ),
 
-          // Lớp phủ mờ để dễ nhìn chữ
           Container(color: Colors.black.withOpacity(0.4)),
 
-          // Nội dung chính
           SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
 
-                const Text(
-                  "Ứng dụng Quản lý Không gian",
-                  style: TextStyle(
+                // 🔥 Dropdown đổi ngôn ngữ
+                Align(
+                  alignment: Alignment.topRight,
+                  child: DropdownButton<String>(
+                    value: Localizations.localeOf(context).languageCode,
+                    dropdownColor: Colors.black87,
+                    style: const TextStyle(color: Colors.white),
+                    iconEnabledColor: Colors.white,
+                    underline: const SizedBox(),
+                    items: const [
+                      DropdownMenuItem(value: 'vi', child: Text("Tiếng Việt")),
+                      DropdownMenuItem(value: 'en', child: Text("English")),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        widget.onChangeLanguage(value);
+                      }
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 10),
+
+                Text(
+                  getText(
+                    context,
+                    "Ứng dụng Quản lý Không gian",
+                    "Space Management App",
+                  ),
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -86,28 +116,32 @@ class _TrangChuState extends State<TrangChu> {
                         _buildCard(
                           context,
                           icon: Icons.work,
-                          title: "Làm việc",
+                          title: getText(context, "Làm việc", "Work"),
                           color: Colors.blue,
                           screen: const KhongGianLamViec(),
                         ),
                         _buildCard(
                           context,
                           icon: Icons.self_improvement,
-                          title: "Thư giãn",
+                          title: getText(context, "Thư giãn", "Relax"),
                           color: Colors.green,
                           screen: const KhongGianThuGian(),
                         ),
                         _buildCard(
                           context,
                           icon: Icons.person,
-                          title: "Cá nhân",
+                          title: getText(context, "Cá nhân", "Personal"),
                           color: Colors.orange,
                           screen: const KhongGianCaNhan(),
                         ),
                         _buildCard(
                           context,
                           icon: Icons.info_outline,
-                          title: "Thông tin nhóm",
+                          title: getText(
+                            context,
+                            "Thông tin nhóm",
+                            "Team Info",
+                          ),
                           color: Colors.purple,
                           screen: const ThongTinNhom(),
                         ),
