@@ -19,54 +19,45 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
 
   bool videoSanSang = false;
   bool dangPhatNhac = false;
-  String noiDungSach = "Đang tải sách...";
 
   int baiDangPhat = 0;
   CheDoPhat cheDo = CheDoPhat.thuTu;
 
+  // ================= DANH SÁCH NHẠC =================
+
   List<Map<String, dynamic>> danhSachNhac = [
-    {"ten": "Chờ Anh Về", "file": "am_thanh/CHỜ ANH VỀ.mp3", "yeuThich": false},
     {
-      "ten": "24H (Moving on version)",
-      "file": "am_thanh/24H (Moving on version).mp3",
+      "ten": "Chờ Anh Về",
+      "file": "CHỜ ANH VỀ.mp3",
+      "poster": "assets/hinh_anh/nhac/cho_anh_ve.jpg",
       "yeuThich": false,
     },
     {
-      "ten": "Tim Anh Ghen",
-      "file": "am_thanh/Tim Anh Ghen.mp3",
-      "yeuThich": false,
-    },
-    {"ten": "2GOILAYS", "file": "am_thanh/2GOILAYS.mp3", "yeuThich": false},
-    {"ten": "Bình Yên", "file": "am_thanh/Bình Yên.mp3", "yeuThich": false},
-    {
-      "ten": "Ex’s Hate Me (Part 2)",
-      "file": "am_thanh/Ex’s Hate Me (Part 2).mp3",
-      "yeuThich": false,
-    },
-    {"ten": "Em Iu", "file": "am_thanh/Em Iu.mp3", "yeuThich": false},
-    {"ten": "Ghé Qua", "file": "am_thanh/Ghé Qua.mp3", "yeuThich": false},
-    {"ten": "Exit Sign", "file": "am_thanh/Exit Sign.mp3", "yeuThich": false},
-    {
-      "ten": "Hai Thằng Bịp",
-      "file": "am_thanh/Hai Thằng Bịp.mp3",
-      "yeuThich": false,
-    },
-    {"ten": "In Love", "file": "am_thanh/In Love.mp3", "yeuThich": false},
-    {"ten": "Mùa Mưa Ấy", "file": "am_thanh/Mùa Mưa Ấy.mp3", "yeuThich": false},
-    {
-      "ten": "Những Lời Hứa Bỏ Quên",
-      "file": "am_thanh/Những Lời Hứa Bỏ Quên.mp3",
+      "ten": "Bình Yên",
+      "file": "Bình Yên.mp3",
+      "poster": "assets/hinh_anh/nhac/binh_yen.jpg",
       "yeuThich": false,
     },
     {
-      "ten": "Nếu Những Tiếc Nuối",
-      "file": "am_thanh/Nếu Những Tiếc Nuối.mp3",
+      "ten": "In Love",
+      "file": "In Love.mp3",
+      "poster": "assets/hinh_anh/nhac/in_love.jpg",
       "yeuThich": false,
     },
+  ];
+
+  // ================= DANH SÁCH SÁCH =================
+
+  List<Map<String, String>> danhSachSach = [
     {
-      "ten": "Mục Hạ Vô Nhân",
-      "file": "am_thanh/Mục Hạ Vô Nhân.mp3",
-      "yeuThich": false,
+      "ten": "Chuyển đổi số",
+      "file": "assets/sach/book1.txt",
+      "poster": "assets/hinh_anh/sach/book1.jpg",
+    },
+    {
+      "ten": "Sức mạnh tư duy",
+      "file": "assets/sach/book2.txt",
+      "poster": "assets/hinh_anh/sach/book2.jpg",
     },
   ];
 
@@ -81,7 +72,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
   void initState() {
     super.initState();
     _khoiTaoVideo();
-    _taiSach();
 
     _audioPlayer.onPlayerComplete.listen((event) {
       _xuLyKhiHetBai();
@@ -92,6 +82,7 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
 
   Future<void> _khoiTaoVideo() async {
     _videoController = VideoPlayerController.asset("assets/video/videonen.mp4");
+
     await _videoController.initialize();
     await _videoController.setLooping(true);
     await _videoController.play();
@@ -99,24 +90,14 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     if (mounted) setState(() => videoSanSang = true);
   }
 
-  // ================= SÁCH =================
-
-  Future<void> _taiSach() async {
-    try {
-      final data = await rootBundle.loadString(
-        "assets/hinh_anh/Báo cáo đồ ân cơ sở.docx",
-      );
-      if (mounted) setState(() => noiDungSach = data);
-    } catch (_) {
-      if (mounted) setState(() => noiDungSach = "Không tìm thấy file sách.");
-    }
-  }
-
   // ================= PHÁT NHẠC =================
 
   Future<void> _phatBai(int index) async {
     await _audioPlayer.stop();
-    await _audioPlayer.play(AssetSource(danhSachNhac[index]["file"]));
+
+    await _audioPlayer.play(
+      AssetSource("am_thanh/${danhSachNhac[index]["file"]}"),
+    );
 
     setState(() {
       baiDangPhat = index;
@@ -127,28 +108,32 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
   Future<void> _pausePlay() async {
     if (dangPhatNhac) {
       await _audioPlayer.pause();
-      setState(() => dangPhatNhac = false);
     } else {
       await _audioPlayer.resume();
-      setState(() => dangPhatNhac = true);
     }
+    setState(() => dangPhatNhac = !dangPhatNhac);
   }
-
-  // ================= LOGIC HẾT BÀI =================
 
   void _xuLyKhiHetBai() {
     if (cheDo == CheDoPhat.lapMot) {
       _phatBai(baiDangPhat);
-    } else if (cheDo == CheDoPhat.ngauNhien) {
+      return;
+    }
+
+    if (cheDo == CheDoPhat.ngauNhien) {
       _phatBai(Random().nextInt(danhSachNhac.length));
-    } else if (cheDo == CheDoPhat.lapTatCa) {
+      return;
+    }
+
+    if (cheDo == CheDoPhat.lapTatCa) {
       _phatBai((baiDangPhat + 1) % danhSachNhac.length);
+      return;
+    }
+
+    if (baiDangPhat < danhSachNhac.length - 1) {
+      _phatBai(baiDangPhat + 1);
     } else {
-      if (baiDangPhat < danhSachNhac.length - 1) {
-        _phatBai(baiDangPhat + 1);
-      } else {
-        setState(() => dangPhatNhac = false);
-      }
+      setState(() => dangPhatNhac = false);
     }
   }
 
@@ -158,21 +143,17 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     });
   }
 
-  void _doiYeuThich(int index) {
-    setState(() {
-      danhSachNhac[index]["yeuThich"] =
-          !(danhSachNhac[index]["yeuThich"] ?? false);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          danhSachNhac[index]["yeuThich"]
-              ? "Đã thêm vào yêu thích ❤️"
-              : "Đã bỏ khỏi yêu thích",
-        ),
-      ),
-    );
+  IconData _iconCheDo() {
+    switch (cheDo) {
+      case CheDoPhat.ngauNhien:
+        return Icons.shuffle;
+      case CheDoPhat.lapMot:
+        return Icons.repeat_one;
+      case CheDoPhat.lapTatCa:
+        return Icons.repeat;
+      default:
+        return Icons.playlist_play;
+    }
   }
 
   @override
@@ -187,21 +168,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.favorite),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => NhacYeuThich(
-                danhSach: danhSachNhac
-                    .where((b) => b["yeuThich"] == true)
-                    .toList(),
-              ),
-            ),
-          );
-        },
-      ),
       body: Stack(
         children: [
           if (videoSanSang)
@@ -219,7 +185,7 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
             Container(color: Colors.black),
 
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.4)),
+            child: Container(color: Colors.black.withOpacity(0.5)),
           ),
 
           SafeArea(
@@ -237,15 +203,26 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
 
                 const SizedBox(height: 20),
 
-                // PLAYER
+                // ================= PLAYER =================
                 Card(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(25),
                   ),
+                  elevation: 8,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            danhSachNhac[baiDangPhat]["poster"],
+                            height: 160,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(height: 15),
                         Text(
                           danhSachNhac[baiDangPhat]["ten"],
                           style: const TextStyle(
@@ -253,7 +230,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -271,7 +247,7 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                                 dangPhatNhac
                                     ? Icons.pause_circle
                                     : Icons.play_circle,
-                                size: 45,
+                                size: 50,
                               ),
                               onPressed: _pausePlay,
                             ),
@@ -284,13 +260,7 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                               },
                             ),
                             IconButton(
-                              icon: Icon(
-                                cheDo == CheDoPhat.ngauNhien
-                                    ? Icons.shuffle
-                                    : cheDo == CheDoPhat.lapMot
-                                    ? Icons.repeat_one
-                                    : Icons.repeat,
-                              ),
+                              icon: Icon(_iconCheDo()),
                               onPressed: _doiCheDo,
                             ),
                           ],
@@ -300,106 +270,66 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                   ),
                 ),
 
-                const SizedBox(height: 25),
+                const SizedBox(height: 30),
 
-                // DANH SÁCH NHẠC
-                ...List.generate(danhSachNhac.length, (index) {
-                  bool dangPhat = index == baiDangPhat && dangPhatNhac;
+                const Text(
+                  "Danh sách nhạc",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
 
-                  return Card(
-                    child: ListTile(
-                      leading: Icon(
-                        dangPhat ? Icons.graphic_eq : Icons.music_note,
-                      ),
-                      title: Text(danhSachNhac[index]["ten"]),
-                      trailing: IconButton(
-                        icon: Icon(
-                          danhSachNhac[index]["yeuThich"]
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: Colors.red,
+                SizedBox(
+                  height: 160,
+                  child: GridView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: danhSachNhac.length,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 1,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1,
                         ),
-                        onPressed: () => _doiYeuThich(index),
-                      ),
-                      onTap: () => _phatBai(index),
-                    ),
-                  );
-                }),
-
-                const SizedBox(height: 30),
-
-                // SÁCH
-                const Text(
-                  "Sách yêu thích",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(noiDungSach),
-                ),
-
-                const SizedBox(height: 30),
-
-                // TRÍCH DẪN
-                const Text(
-                  "Trích dẫn truyền cảm hứng",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ...danhSachTrichDan.map(
-                  (quote) => Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(quote),
-                    ),
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () => _phatBai(index),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                danhSachNhac[index]["poster"],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                              Container(color: Colors.black.withOpacity(0.4)),
+                              Center(
+                                child: Text(
+                                  danhSachNhac[index]["ten"],
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
 
-                const SizedBox(height: 50),
+                const SizedBox(height: 40),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// ================= MÀN HÌNH YÊU THÍCH =================
-
-class NhacYeuThich extends StatelessWidget {
-  final List<Map<String, dynamic>> danhSach;
-
-  const NhacYeuThich({super.key, required this.danhSach});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Nhạc yêu thích")),
-      body: danhSach.isEmpty
-          ? const Center(child: Text("Chưa có bài yêu thích"))
-          : ListView.builder(
-              itemCount: danhSach.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  leading: const Icon(Icons.music_note),
-                  title: Text(danhSach[index]["ten"]),
-                );
-              },
-            ),
     );
   }
 }

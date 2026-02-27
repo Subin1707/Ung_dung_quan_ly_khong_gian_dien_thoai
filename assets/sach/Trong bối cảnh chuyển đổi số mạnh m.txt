@@ -1,0 +1,6 @@
+Trong bối cảnh chuyển đổi số mạnh mẽ hiện nay, các hoạt động giao dịch trực tuyến, đăng ký tài khoản, gửi email và truy cập website diễn ra với tần suất rất lớn. Điều này kéo theo sự gia tăng của các hành vi gian lận như:
+-Tạo nhiều tài khoản giả
+- Sử dụng IP đáng ngờ để gửi spam
+- Phát tán URL độc hại
+- Liên kết nhiều thực thể nhằm che giấu hành vi bất thường
+Các hệ thống phát hiện gian lận truyền thống chủ yếu dựa trên luật (rule-based) hoặc phân tích từng thực thể riêng lẻ, dẫn đến hạn chế trong việc phát hiện các mối liên hệ phức tạp giữa Email, IP và URL. Trong khi đó, hành vi gian lận hiện đại thường tồn tại dưới dạng mạng lưới liên kết chặt chẽ.

@@ -67,6 +67,8 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/hinh_anh/
+    - assets/hinh_anh/nhac/
+    - assets/hinh_anh/sach/
     - assets/video/
     - assets/am_thanh/
     - assets/font_chu/
