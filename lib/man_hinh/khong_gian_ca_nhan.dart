@@ -26,7 +26,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
     PermissionStatus videos = await Permission.videos.request();
 
     if (images.isPermanentlyDenied || videos.isPermanentlyDenied) {
-      openAppSettings();
+      await openAppSettings();
       return false;
     }
 
@@ -35,7 +35,9 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
   // ================= THÊM KỶ NIỆM =================
   void _themKyNiem() {
-    TextEditingController controller = TextEditingController();
+    TextEditingController tieuDeController = TextEditingController();
+    TextEditingController noiDungController = TextEditingController();
+
     List<String> selectedImages = [];
     List<String> selectedVideos = [];
 
@@ -45,7 +47,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              scrollable: true, // ✅ FIX crash
+              scrollable: true,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -56,7 +58,15 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: controller,
+                      controller: tieuDeController,
+                      decoration: const InputDecoration(
+                        labelText: "Tiêu đề",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: noiDungController,
                       maxLines: 3,
                       decoration: const InputDecoration(
                         labelText: "Nội dung",
@@ -76,6 +86,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         final images = await _picker.pickMultiImage(
                           imageQuality: 80,
                         );
+
                         if (images.isEmpty) return;
 
                         setStateDialog(() {
@@ -97,6 +108,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                         final video = await _picker.pickVideo(
                           source: ImageSource.gallery,
                         );
+
                         if (video == null) return;
 
                         setStateDialog(() {
@@ -107,14 +119,12 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
                     const SizedBox(height: 15),
 
-                    // ===== PREVIEW ẢNH =====
                     if (selectedImages.isNotEmpty)
                       SizedBox(
                         height: 100,
                         child: ListView.builder(
                           shrinkWrap: true,
-                          physics:
-                              const NeverScrollableScrollPhysics(), // ✅ FIX
+                          physics: const NeverScrollableScrollPhysics(),
                           scrollDirection: Axis.horizontal,
                           itemCount: selectedImages.length,
                           itemBuilder: (_, index) {
@@ -155,13 +165,16 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    if (controller.text.isEmpty) return;
+                    if (tieuDeController.text.isEmpty ||
+                        noiDungController.text.isEmpty)
+                      return;
 
                     setState(() {
                       danhSach.add(
                         GhiChu(
                           id: _taoId(),
-                          noiDung: controller.text,
+                          tieuDe: tieuDeController.text,
+                          noiDung: noiDungController.text,
                           hinhAnhPaths: selectedImages,
                           videoPaths: selectedVideos,
                         ),
@@ -243,11 +256,16 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          ghiChu.noiDung,
+                          ghiChu.tieuDe,
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          ghiChu.noiDung,
+                          style: const TextStyle(fontSize: 15),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -267,7 +285,6 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                               itemCount: ghiChu.hinhAnhPaths.length,
                               itemBuilder: (_, i) {
                                 final file = File(ghiChu.hinhAnhPaths[i]);
-
                                 return Padding(
                                   padding: const EdgeInsets.only(right: 8),
                                   child: GestureDetector(
