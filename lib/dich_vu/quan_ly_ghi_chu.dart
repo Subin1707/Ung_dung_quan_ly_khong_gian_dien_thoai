@@ -11,12 +11,14 @@ class QuanLyGhiChu {
   // ================= THÊM =================
 
   void themGhiChu({
+    required String tieuDe,
     required String noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
   }) {
     final ghiChu = GhiChu(
       id: _taoId(),
+      tieuDe: tieuDe,
       noiDung: noiDung,
       hinhAnhPaths: hinhAnhPaths,
       videoPaths: videoPaths,
@@ -35,6 +37,7 @@ class QuanLyGhiChu {
 
   void capNhatGhiChu(
     String id, {
+    String? tieuDe,
     String? noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
@@ -45,6 +48,7 @@ class QuanLyGhiChu {
     final ghiChuCu = _danhSach[index];
 
     _danhSach[index] = ghiChuCu.copyWith(
+      tieuDe: tieuDe,
       noiDung: noiDung,
       hinhAnhPaths: hinhAnhPaths,
       videoPaths: videoPaths,
@@ -54,9 +58,11 @@ class QuanLyGhiChu {
   // ================= TÌM KIẾM =================
 
   List<GhiChu> timKiem(String tuKhoa) {
-    return _danhSach
-        .where((g) => g.noiDung.toLowerCase().contains(tuKhoa.toLowerCase()))
-        .toList();
+    return _danhSach.where((g) {
+      final key = tuKhoa.toLowerCase();
+      return g.tieuDe.toLowerCase().contains(key) ||
+          g.noiDung.toLowerCase().contains(key);
+    }).toList();
   }
 
   // ================= LỌC THEO LOẠI =================
