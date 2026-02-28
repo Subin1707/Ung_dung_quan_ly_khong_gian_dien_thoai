@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../mo_hinh/cong_viec.dart';
 import '../database/database_helper.dart';
 import '../ngon_ngu/ngon_ngu_quan_ly.dart';
+import '../widgets/app_drawer.dart';
 
 class KhongGianLamViec extends StatefulWidget {
   const KhongGianLamViec({super.key});
@@ -222,6 +223,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: Text(lang.text("work_space")),
         centerTitle: true,

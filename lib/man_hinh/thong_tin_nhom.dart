@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:provider/provider.dart';
 import '../ngon_ngu/ngon_ngu_quan_ly.dart';
+import '../widgets/app_drawer.dart';
 
 class ThongTinNhom extends StatefulWidget {
   const ThongTinNhom({super.key});
@@ -51,6 +52,15 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
     }
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      drawer: const AppDrawer(),
+
+      appBar: AppBar(
+        title: Text(lang.text("team_info")),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+      ),
+
       body: Stack(
         children: [
           Positioned.fill(

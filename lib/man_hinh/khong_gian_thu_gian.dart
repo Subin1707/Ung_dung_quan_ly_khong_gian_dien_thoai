@@ -5,6 +5,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../ngon_ngu/ngon_ngu_quan_ly.dart';
+import '../widgets/app_drawer.dart';
 
 class KhongGianThuGian extends StatefulWidget {
   const KhongGianThuGian({super.key});
@@ -242,6 +243,14 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     final lang = context.watch<NgonNguQuanLy>();
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      drawer: const AppDrawer(),
+
+      appBar: AppBar(
+        title: Text(lang.text("relax")),
+        backgroundColor: Colors.transparent,
+        centerTitle: true,
+      ),
       body: Stack(
         children: [
           if (videoSanSang)

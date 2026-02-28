@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../mo_hinh/ghi_chu.dart';
 import '../database/database_helper.dart';
 import 'package:khonggiandienthoai/ngon_ngu/ngon_ngu_quan_ly.dart';
+import '../widgets/app_drawer.dart';
 
 class VideoFullScreen extends StatefulWidget {
   final String path;
@@ -284,6 +285,7 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      drawer: const AppDrawer(),
       appBar: AppBar(
         title: Text(lang.text("personal_space")),
         backgroundColor: Colors.transparent,
