@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
 import '../mo_hinh/cong_viec.dart';
 import '../database/database_helper.dart';
+import '../utils/app_text.dart';
 
 class KhongGianLamViec extends StatefulWidget {
   const KhongGianLamViec({super.key});
@@ -24,9 +25,8 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     super.initState();
     _loadData();
 
-    // VIDEO BACKGROUND
     _videoController =
-        VideoPlayerController.asset("assets/video/nenthongtin.mp4")
+        VideoPlayerController.asset("assets/video/nenkhonggianlamviec.mp4")
           ..setLooping(true)
           ..setVolume(0)
           ..initialize().then((_) {
@@ -76,15 +76,23 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: Text(index == null ? "Thêm công việc" : "Sửa công việc"),
+              title: Text(
+                index == null
+                    ? AppText.t(context, "Thêm công việc", "Add Task")
+                    : AppText.t(context, "Sửa công việc", "Edit Task"),
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   children: [
                     TextField(
                       controller: controller,
-                      decoration: const InputDecoration(
-                        labelText: "Tên công việc",
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: AppText.t(
+                          context,
+                          "Tên công việc",
+                          "Task name",
+                        ),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 15),
@@ -93,7 +101,11 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                         Expanded(
                           child: Text(
                             selectedDate == null
-                                ? "Chưa hẹn giờ"
+                                ? AppText.t(
+                                    context,
+                                    "Chưa hẹn giờ",
+                                    "No schedule",
+                                  )
                                 : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - "
                                       "${selectedDate!.hour.toString().padLeft(2, '0')}:"
                                       "${selectedDate!.minute.toString().padLeft(2, '0')}",
@@ -137,7 +149,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Hủy"),
+                  child: Text(AppText.t(context, "Hủy", "Cancel")),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -163,7 +175,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
                     if (mounted) Navigator.pop(context);
                   },
-                  child: const Text("Lưu"),
+                  child: Text(AppText.t(context, "Lưu", "Save")),
                 ),
               ],
             );
@@ -188,7 +200,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     final cv = danhSach[index];
     cv.toggleHoanThanh();
     await DatabaseHelper.instance.updateCongViec(cv);
-
     setState(() {});
   }
 
@@ -196,13 +207,19 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   String _thoiGianConLai(DateTime thoiGian) {
     final diff = thoiGian.difference(DateTime.now());
 
-    if (diff.isNegative) return "Đã hết hạn";
+    if (diff.isNegative) {
+      return AppText.t(context, "Đã hết hạn", "Expired");
+    }
 
     final gio = diff.inHours;
     final phut = diff.inMinutes % 60;
     final giay = diff.inSeconds % 60;
 
-    return "$gio giờ $phut phút $giay giây";
+    if (Localizations.localeOf(context).languageCode == 'vi') {
+      return "$gio giờ $phut phút $giay giây";
+    } else {
+      return "$gio h $phut m $giay s";
+    }
   }
 
   // ================= UI =================
@@ -210,7 +227,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Không gian làm việc"),
+        title: Text(AppText.t(context, "Không gian làm việc", "Work Space")),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -218,7 +235,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          // VIDEO BACKGROUND
           Positioned.fill(
             child: _videoController.value.isInitialized
                 ? FittedBox(
@@ -231,20 +247,16 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                   )
                 : Container(color: Colors.black),
           ),
-
-          // LỚP LÀM MỜ
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.4)),
           ),
-
-          // NỘI DUNG
           Padding(
             padding: const EdgeInsets.only(top: 100),
             child: danhSach.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
-                      "Chưa có công việc",
-                      style: TextStyle(color: Colors.white, fontSize: 18),
+                      AppText.t(context, "Chưa có công việc", "No tasks yet"),
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   )
                 : ListView.builder(
