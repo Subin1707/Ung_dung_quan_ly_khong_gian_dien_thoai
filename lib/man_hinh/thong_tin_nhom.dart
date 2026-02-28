@@ -9,148 +9,194 @@ class ThongTinNhom extends StatefulWidget {
 }
 
 class _ThongTinNhomState extends State<ThongTinNhom> {
-  late VideoPlayerController _controller;
+  late VideoPlayerController _bgController;
+  late VideoPlayerController _introController;
 
   @override
   void initState() {
     super.initState();
 
-    _controller = VideoPlayerController.asset("assets/video/intro.mp4")
+    // ===== VIDEO BACKGROUND =====
+    _bgController = VideoPlayerController.asset("assets/video/nenthongtin.mp4")
       ..initialize().then((_) {
         setState(() {});
       })
       ..setLooping(true)
+      ..setVolume(0)
+      ..play();
+
+    // ===== VIDEO INTRO TRONG CARD =====
+    _introController = VideoPlayerController.asset("assets/video/intro.mp4")
+      ..initialize().then((_) {
+        setState(() {});
+      })
+      ..setLooping(true)
+      ..setVolume(0)
       ..play();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _bgController.dispose();
+    _introController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Thông tin nhóm"), centerTitle: true),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Card(
-            elevation: 10,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  /// ===== VIDEO THAY ẢNH =====
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: _controller.value.isInitialized
-                        ? AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: VideoPlayer(_controller),
-                          )
-                        : const SizedBox(
-                            height: 120,
-                            child: Center(child: CircularProgressIndicator()),
-                          ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "BÀI TẬP LỚN CUỐI KỲ",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  const Text(
-                    "NHÓM 13",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.deepPurple,
+      body: Stack(
+        children: [
+          /// ===== BACKGROUND VIDEO =====
+          SizedBox.expand(
+            child: _bgController.value.isInitialized
+                ? FittedBox(
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _bgController.value.size.width,
+                      height: _bgController.value.size.height,
+                      child: VideoPlayer(_bgController),
                     ),
+                  )
+                : Container(color: Colors.black),
+          ),
+
+          /// Lớp tối cho dễ đọc
+          Container(color: Colors.black.withOpacity(0.4)),
+
+          /// ===== NỘI DUNG =====
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Card(
+                  color: Colors.white.withOpacity(0.92),
+                  elevation: 12,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
                   ),
-
-                  const Divider(height: 30, thickness: 1.2),
-
-                  _thongTinDong("Môn học", "Lập trình cho thiết bị di động"),
-                  _thongTinDong(
-                    "Tên đề tài",
-                    "Quản lý & cá nhân hóa không gian điện thoại",
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade50,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: const Row(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.school, color: Colors.deepPurple),
-                        SizedBox(width: 10),
-                        Expanded(
+                        /// ===== VIDEO INTRO =====
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: _introController.value.isInitialized
+                              ? AspectRatio(
+                                  aspectRatio:
+                                      _introController.value.aspectRatio,
+                                  child: VideoPlayer(_introController),
+                                )
+                              : const SizedBox(
+                                  height: 150,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        const Text(
+                          "BÀI TẬP LỚN CUỐI KỲ",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        const Text(
+                          "NHÓM 13",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.deepPurple,
+                          ),
+                        ),
+
+                        const Divider(height: 30, thickness: 1.2),
+
+                        _thongTinDong(
+                          "Môn học",
+                          "Lập trình cho thiết bị di động",
+                        ),
+                        _thongTinDong(
+                          "Tên đề tài",
+                          "Quản lý & cá nhân hóa không gian điện thoại",
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.deepPurple.shade50,
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.school, color: Colors.deepPurple),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Giảng viên hướng dẫn:\nTS. Nguyễn Xuân Quế",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        const Align(
+                          alignment: Alignment.centerLeft,
                           child: Text(
-                            "Giảng viên hướng dẫn:\nTS. Nguyễn Xuân Quế",
+                            "Thành viên nhóm:",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontSize: 16,
                             ),
                           ),
                         ),
+
+                        const SizedBox(height: 15),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            _thanhVienCard(
+                              "assets/hinh_anh/quyen.jpg",
+                              "Nguyễn Mạnh Quyền",
+                              "23010198",
+                            ),
+                            _thanhVienCard(
+                              "assets/hinh_anh/hoang.jpg",
+                              "Phạm Văn Hoàng",
+                              "23010245",
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 25),
+
+                        _thongTinDong("Năm thực hiện", "2025"),
                       ],
                     ),
                   ),
-
-                  const SizedBox(height: 25),
-
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Thành viên nhóm:",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 15),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _thanhVienCard(
-                        "assets/hinh_anh/quyen.png",
-                        "Nguyễn Mạnh Quyền",
-                        "23010198",
-                      ),
-                      _thanhVienCard(
-                        "assets/hinh_anh/hoang.png",
-                        "Phạm Văn Hoàng",
-                        "23010245",
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 25),
-
-                  _thongTinDong("Năm thực hiện", "2025"),
-                ],
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -159,7 +205,6 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             flex: 3,
