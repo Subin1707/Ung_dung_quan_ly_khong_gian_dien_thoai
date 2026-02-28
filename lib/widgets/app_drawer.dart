@@ -120,7 +120,6 @@ class AppDrawer extends StatelessWidget {
       onTap: () {
         Navigator.pop(context);
 
-        // Không push lại chính nó
         if (ModalRoute.of(context)?.settings.name !=
             page.runtimeType.toString()) {
           Navigator.pushReplacement(

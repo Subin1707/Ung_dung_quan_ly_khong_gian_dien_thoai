@@ -62,7 +62,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     });
   }
 
-  // ================= THÊM / SỬA =================
   void _moHopThoai({int? index}) {
     final lang = context.read<NgonNguQuanLy>();
 
@@ -180,7 +179,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     );
   }
 
-  // ================= XÓA =================
   void _xoa(int index) async {
     final id = danhSach[index].id;
     await DatabaseHelper.instance.deleteCongViec(id);
@@ -190,7 +188,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     });
   }
 
-  // ================= TOGGLE =================
   void _toggle(int index) async {
     final cv = danhSach[index];
     cv.toggleHoanThanh();
@@ -198,7 +195,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     setState(() {});
   }
 
-  // ================= ĐẾM NGƯỢC =================
   String _thoiGianConLai(DateTime thoiGian) {
     final lang = context.watch<NgonNguQuanLy>();
     final diff = thoiGian.difference(DateTime.now());
@@ -216,7 +212,6 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
         "$giay ${lang.text("seconds")}";
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<NgonNguQuanLy>();

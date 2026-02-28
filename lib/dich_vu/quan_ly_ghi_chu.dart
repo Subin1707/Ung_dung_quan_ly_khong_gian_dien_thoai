@@ -4,13 +4,9 @@ import '../mo_hinh/ghi_chu.dart';
 class QuanLyGhiChu extends ChangeNotifier {
   final List<GhiChu> _danhSach = [];
 
-  // ================= GET DANH SÁCH =================
-
   List<GhiChu> get danhSach => List.unmodifiable(_danhSach);
 
   String _taoId() => DateTime.now().millisecondsSinceEpoch.toString();
-
-  // ================= THÊM =================
 
   void themGhiChu({
     required String tieuDe,
@@ -33,14 +29,10 @@ class QuanLyGhiChu extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= XÓA =================
-
   void xoaGhiChu(String id) {
     _danhSach.removeWhere((g) => g.id == id);
     notifyListeners();
   }
-
-  // ================= CẬP NHẬT =================
 
   void capNhatGhiChu(
     String id, {
@@ -66,8 +58,6 @@ class QuanLyGhiChu extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= TÌM KIẾM =================
-
   List<GhiChu> timKiem(String tuKhoa) {
     final key = tuKhoa.toLowerCase();
     return _danhSach.where((g) {
@@ -76,13 +66,9 @@ class QuanLyGhiChu extends ChangeNotifier {
     }).toList();
   }
 
-  // ================= LỌC THEO LOẠI =================
-
   List<GhiChu> locTheoLoai(LoaiNoiDung loai) {
     return _danhSach.where((g) => g.loaiNoiDung == loai).toList();
   }
-
-  // ================= SẮP XẾP =================
 
   void sapXepMoiNhat() {
     _danhSach.sort((a, b) => b.thoiGianTao.compareTo(a.thoiGianTao));
@@ -93,14 +79,10 @@ class QuanLyGhiChu extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ================= CLEAR =================
-
   void xoaTatCa() {
     _danhSach.clear();
     notifyListeners();
   }
-
-  // ================= GET BY ID =================
 
   GhiChu? layTheoId(String id) {
     try {

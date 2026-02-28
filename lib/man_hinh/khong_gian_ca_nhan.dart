@@ -122,8 +122,6 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
     return false;
   }
 
-  // ================= THÊM KỶ NIỆM =================
-
   void _themKyNiem() {
     final lang = context.read<NgonNguQuanLy>();
 
@@ -352,7 +350,6 @@ class _KhongGianCaNhanState extends State<KhongGianCaNhan> {
                               ),
                               const SizedBox(height: 10),
 
-                              // ===== GRID ẢNH KÉO NGANG =====
                               if (ghiChu.hinhAnhPaths.isNotEmpty)
                                 SizedBox(
                                   height: 110,

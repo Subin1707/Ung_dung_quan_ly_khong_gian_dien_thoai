@@ -15,8 +15,6 @@ class CongViec {
     this.thoiGianHen,
   }) : thoiGianTao = thoiGianTao ?? DateTime.now();
 
-  // ================= TOGGLE =================
-
   void toggleHoanThanh() {
     daHoanThanh = !daHoanThanh;
   }
@@ -28,8 +26,6 @@ class CongViec {
   void capNhatHenGio(DateTime? thoiGianMoi) {
     thoiGianHen = thoiGianMoi;
   }
-
-  // ================= GETTER =================
 
   TrangThaiCongViec get trangThai => daHoanThanh
       ? TrangThaiCongViec.daHoanThanh
@@ -49,8 +45,6 @@ class CongViec {
         "${p(thoiGianHen!.hour)}:${p(thoiGianHen!.minute)}";
   }
 
-  // ================= COPY =================
-
   CongViec copyWith({
     String? tieuDe,
     bool? daHoanThanh,
@@ -65,13 +59,11 @@ class CongViec {
     );
   }
 
-  // ================= MAP =================
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'tieuDe': tieuDe,
-      'daHoanThanh': daHoanThanh ? 1 : 0, // đổi bool -> int
+      'daHoanThanh': daHoanThanh ? 1 : 0,
       'thoiGianTao': thoiGianTao.toIso8601String(),
       'thoiGianHen': thoiGianHen?.toIso8601String(),
     };
@@ -81,7 +73,7 @@ class CongViec {
     return CongViec(
       id: map['id'] ?? '',
       tieuDe: map['tieuDe'] ?? '',
-      daHoanThanh: map['daHoanThanh'] == 1, // đổi int -> bool
+      daHoanThanh: map['daHoanThanh'] == 1,
       thoiGianTao:
           DateTime.tryParse(map['thoiGianTao'] ?? '') ?? DateTime.now(),
       thoiGianHen: map['thoiGianHen'] != null

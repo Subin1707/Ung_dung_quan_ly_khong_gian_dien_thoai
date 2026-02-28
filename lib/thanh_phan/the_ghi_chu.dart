@@ -48,7 +48,6 @@ class TheGhiChu extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Tiêu đề
               Text(
                 ghiChu.tieuDe,
                 style: const TextStyle(
@@ -59,7 +58,6 @@ class TheGhiChu extends StatelessWidget {
 
               const SizedBox(height: 6),
 
-              /// Nội dung (giới hạn 2-3 dòng cho gọn)
               Text(
                 ghiChu.noiDung,
                 maxLines: 3,
@@ -69,7 +67,6 @@ class TheGhiChu extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              /// Thời gian tạo
               Text(
                 "Tạo: ${DinhDangThoiGian.dinhDangThongMinh(ghiChu.thoiGianTao)}",
                 style: const TextStyle(fontSize: 12, color: Colors.grey),

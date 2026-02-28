@@ -27,8 +27,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
   int baiDangPhat = 0;
   CheDoPhat cheDo = CheDoPhat.thuTu;
 
-  // ================= DANH SÁCH NHẠC =================
-
   final List<Map<String, dynamic>> danhSachNhac = [
     {
       "ten": "Chờ Anh Về",
@@ -132,8 +130,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     "Tập trung vào mục tiêu của bạn.",
   ];
 
-  // ================= INIT =================
-
   @override
   void initState() {
     super.initState();
@@ -152,8 +148,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
 
     if (mounted) setState(() => videoSanSang = true);
   }
-
-  // ================= LOGIC PHÁT =================
 
   Future<void> _phatBai(int index) async {
     if (index < 0 || index >= danhSachNhac.length) return;
@@ -236,8 +230,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     return cheDo == CheDoPhat.thuTu ? Colors.grey : Colors.blue;
   }
 
-  // ================= UI =================
-
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<NgonNguQuanLy>();
@@ -310,8 +302,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
       ),
     );
   }
-
-  // ================= WIDGETS =================
 
   Widget _playerCard() {
     return Card(

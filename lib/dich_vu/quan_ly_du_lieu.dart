@@ -6,14 +6,10 @@ import '../mo_hinh/ghi_chu.dart';
 class QuanLyDuLieu {
   static const String _tenFile = "ghi_chu_data.json";
 
-  // ================= LẤY ĐƯỜNG DẪN FILE =================
-
   Future<File> _layFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File("${directory.path}/$_tenFile");
   }
-
-  // ================= LƯU DANH SÁCH =================
 
   Future<void> luuDanhSach(List<GhiChu> danhSach) async {
     try {
@@ -30,8 +26,6 @@ class QuanLyDuLieu {
       print("Lỗi khi lưu dữ liệu: $e");
     }
   }
-
-  // ================= ĐỌC DANH SÁCH =================
 
   Future<List<GhiChu>> docDanhSach() async {
     try {
@@ -53,8 +47,6 @@ class QuanLyDuLieu {
       return [];
     }
   }
-
-  // ================= XÓA FILE =================
 
   Future<void> xoaDuLieu() async {
     final file = await _layFile();

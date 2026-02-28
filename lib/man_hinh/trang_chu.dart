@@ -45,7 +45,6 @@ class _TrangChuState extends State<TrangChu> {
     return Scaffold(
       extendBodyBehindAppBar: true,
 
-      // ================= APPBAR =================
       appBar: AppBar(
         title: Text(lang.text("app_title")),
         centerTitle: true,
@@ -53,7 +52,6 @@ class _TrangChuState extends State<TrangChu> {
         elevation: 0,
       ),
 
-      // ================= DRAWER =================
       drawer: Drawer(
         child: Container(
           decoration: const BoxDecoration(
@@ -134,7 +132,6 @@ class _TrangChuState extends State<TrangChu> {
 
                 const Spacer(),
 
-                // ================= LANGUAGE SWITCH =================
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: DropdownButton<NgonNgu>(
@@ -166,7 +163,6 @@ class _TrangChuState extends State<TrangChu> {
         ),
       ),
 
-      // ================= BODY =================
       body: Stack(
         children: [
           if (_controller.value.isInitialized)

@@ -30,7 +30,6 @@ class UngDungKhongGian extends StatelessWidget {
       darkTheme: ChuDeUngDung.toi,
       themeMode: ThemeMode.system,
 
-      // ================= NGÔN NGỮ =================
       locale: lang.locale,
 
       supportedLocales: const [Locale('vi'), Locale('en')],

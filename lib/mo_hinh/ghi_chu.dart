@@ -25,8 +25,6 @@ class GhiChu {
        videoPaths = List.unmodifiable(videoPaths ?? []),
        thoiGianTao = thoiGianTao ?? DateTime.now();
 
-  // ================= CHECK MEDIA =================
-
   bool get coAnh => hinhAnhPaths.isNotEmpty;
   bool get coVideo => videoPaths.isNotEmpty;
 
@@ -37,8 +35,6 @@ class GhiChu {
     return LoaiNoiDung.text;
   }
 
-  // ================= FORMAT TIME =================
-
   String get thoiGianFormatted {
     String p(int n) => n.toString().padLeft(2, '0');
 
@@ -46,14 +42,12 @@ class GhiChu {
         "${p(thoiGianTao.hour)}:${p(thoiGianTao.minute)}";
   }
 
-  // ================= COPY WITH (FIX LỖI Ở ĐÂY) =================
-
   GhiChu copyWith({
     String? tieuDe,
     String? noiDung,
     List<String>? hinhAnhPaths,
     List<String>? videoPaths,
-    DateTime? thoiGianCapNhat, // 👈 thêm tham số
+    DateTime? thoiGianCapNhat,
   }) {
     return GhiChu(
       id: id,
@@ -65,8 +59,6 @@ class GhiChu {
       thoiGianCapNhat: thoiGianCapNhat ?? this.thoiGianCapNhat,
     );
   }
-
-  // ================= SQLITE MAP =================
 
   Map<String, dynamic> toMap() {
     return {

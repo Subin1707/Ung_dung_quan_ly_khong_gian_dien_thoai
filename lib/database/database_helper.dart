@@ -4,7 +4,6 @@ import '../mo_hinh/cong_viec.dart';
 import '../mo_hinh/ghi_chu.dart';
 
 class DatabaseHelper {
-  // ================= SINGLETON =================
   static final DatabaseHelper instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -13,14 +12,12 @@ class DatabaseHelper {
 
   DatabaseHelper._internal();
 
-  // ================= GET DATABASE =================
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDB();
     return _database!;
   }
 
-  // ================= INIT DATABASE =================
   Future<Database> _initDB() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, _dbName);
@@ -33,7 +30,6 @@ class DatabaseHelper {
     );
   }
 
-  // ================= CREATE TABLE =================
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS cong_viec (
@@ -65,7 +61,6 @@ class DatabaseHelper {
     );
   }
 
-  // ================= ON UPGRADE =================
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
       await db.execute('''
@@ -81,10 +76,6 @@ class DatabaseHelper {
       ''');
     }
   }
-
-  // ==========================================================
-  // ===================== CONG VIEC ==========================
-  // ==========================================================
 
   Future<int> insertCongViec(CongViec congViec) async {
     final db = await database;
@@ -132,10 +123,6 @@ class DatabaseHelper {
     await db.delete('cong_viec');
   }
 
-  // ==========================================================
-  // ======================= GHI CHU ==========================
-  // ==========================================================
-
   Future<int> insertGhiChu(GhiChu ghiChu) async {
     final db = await database;
     return await db.insert(
@@ -182,10 +169,6 @@ class DatabaseHelper {
     await db.delete('ghi_chu');
   }
 
-  // ==========================================================
-  // ======================= RESET ALL ========================
-  // ==========================================================
-
   Future<void> deleteAllData() async {
     final db = await database;
     await db.transaction((txn) async {
@@ -194,7 +177,6 @@ class DatabaseHelper {
     });
   }
 
-  // ================= CLOSE =================
   Future<void> close() async {
     if (_database != null) {
       await _database!.close();

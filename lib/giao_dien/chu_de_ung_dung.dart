@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ChuDeUngDung {
-  // ================= MÀU CHỦ ĐẠO =================
   static const Color mauChinh = Color(0xFF3F51B5);
   static const Color mauPhu = Color(0xFF5C6BC0);
 
-  // ================= THEME SÁNG =================
   static final ThemeData sang = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -52,7 +50,6 @@ class ChuDeUngDung {
     ),
   );
 
-  // ================= THEME TỐI =================
   static final ThemeData toi = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
