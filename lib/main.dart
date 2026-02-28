@@ -1,44 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+
 import 'giao_dien/chu_de_ung_dung.dart';
 import 'man_hinh/trang_chu.dart';
+import 'ngon_ngu/ngon_ngu_quan_ly.dart';
 
 void main() {
-  runApp(const UngDungKhongGian());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => NgonNguQuanLy(),
+      child: const UngDungKhongGian(),
+    ),
+  );
 }
 
-class UngDungKhongGian extends StatefulWidget {
+class UngDungKhongGian extends StatelessWidget {
   const UngDungKhongGian({super.key});
 
   @override
-  State<UngDungKhongGian> createState() => _UngDungKhongGianState();
-}
-
-class _UngDungKhongGianState extends State<UngDungKhongGian> {
-  Locale _locale = const Locale('vi');
-
-  void doiNgonNgu(String ma) {
-    setState(() {
-      _locale = Locale(ma);
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final lang = context.watch<NgonNguQuanLy>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Không Gian Điện Thoại",
+      title: lang.text("app_title"),
+
       theme: ChuDeUngDung.sang,
       darkTheme: ChuDeUngDung.toi,
       themeMode: ThemeMode.system,
 
       // ================= NGÔN NGỮ =================
-      locale: _locale,
+      locale: lang.locale,
 
-      supportedLocales: const [
-        Locale('vi'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('vi'), Locale('en')],
 
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
@@ -46,9 +41,7 @@ class _UngDungKhongGianState extends State<UngDungKhongGian> {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      home: TrangChu(
-        onChangeLanguage: doiNgonNgu,
-      ),
+      home: const TrangChu(),
     );
   }
 }
