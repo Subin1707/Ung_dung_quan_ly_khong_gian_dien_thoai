@@ -8,7 +8,7 @@ class TiengAnh {
     "delete": "Delete",
     "edit": "Edit",
     "language": "Language",
-
+    "home": "Home",
     // ===== Home =====
     "home_title": "Welcome to the Application",
     "work": "Work",

@@ -8,7 +8,7 @@ class TiengViet {
     "delete": "Xóa",
     "edit": "Sửa",
     "language": "Ngôn ngữ",
-
+    "home": "Trang chủ",
     // ===== Trang chủ =====
     "home_title": "Chào mừng đến với ứng dụng",
     "work": "Làm việc",

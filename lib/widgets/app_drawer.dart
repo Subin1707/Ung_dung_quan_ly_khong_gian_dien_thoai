@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:khonggiandienthoai/man_hinh/khong_gian_lam_viec.dart';
 import 'package:provider/provider.dart';
+
 import '../ngon_ngu/ngon_ngu_quan_ly.dart';
+import '../man_hinh/trang_chu.dart';
 import '../man_hinh/khong_gian_lam_viec.dart';
 import '../man_hinh/khong_gian_thu_gian.dart';
 import '../man_hinh/khong_gian_ca_nhan.dart';
@@ -45,6 +46,12 @@ class AppDrawer extends StatelessWidget {
 
               const Divider(color: Colors.white54, height: 40),
 
+              _item(
+                context,
+                icon: Icons.home,
+                title: lang.text("home"),
+                page: const TrangChu(),
+              ),
               _item(
                 context,
                 icon: Icons.work,
@@ -112,10 +119,18 @@ class AppDrawer extends StatelessWidget {
       title: Text(title, style: const TextStyle(color: Colors.white)),
       onTap: () {
         Navigator.pop(context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => page),
-        );
+
+        // Không push lại chính nó
+        if (ModalRoute.of(context)?.settings.name !=
+            page.runtimeType.toString()) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => page,
+              settings: RouteSettings(name: page.runtimeType.toString()),
+            ),
+          );
+        }
       },
     );
   }
