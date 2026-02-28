@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:uuid/uuid.dart';
 import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
+
 import '../mo_hinh/cong_viec.dart';
 import '../database/database_helper.dart';
-import '../utils/app_text.dart';
+import '../ngon_ngu/ngon_ngu_quan_ly.dart';
 
 class KhongGianLamViec extends StatefulWidget {
   const KhongGianLamViec({super.key});
@@ -41,6 +43,13 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     });
   }
 
+  @override
+  void dispose() {
+    timer?.cancel();
+    _videoController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadData() async {
     final data = await DatabaseHelper.instance.getAllCongViec();
     if (!mounted) return;
@@ -52,15 +61,10 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
     });
   }
 
-  @override
-  void dispose() {
-    timer?.cancel();
-    _videoController.dispose();
-    super.dispose();
-  }
-
   // ================= THÊM / SỬA =================
   void _moHopThoai({int? index}) {
+    final lang = context.read<NgonNguQuanLy>();
+
     final controller = TextEditingController(
       text: index != null ? danhSach[index].tieuDe : "",
     );
@@ -69,7 +73,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (_) {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
@@ -77,9 +81,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                 borderRadius: BorderRadius.circular(20),
               ),
               title: Text(
-                index == null
-                    ? AppText.t(context, "Thêm công việc", "Add Task")
-                    : AppText.t(context, "Sửa công việc", "Edit Task"),
+                index == null ? lang.text("add_task") : lang.text("edit_task"),
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -87,11 +89,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                     TextField(
                       controller: controller,
                       decoration: InputDecoration(
-                        labelText: AppText.t(
-                          context,
-                          "Tên công việc",
-                          "Task name",
-                        ),
+                        labelText: lang.text("task_name"),
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -101,12 +99,8 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                         Expanded(
                           child: Text(
                             selectedDate == null
-                                ? AppText.t(
-                                    context,
-                                    "Chưa hẹn giờ",
-                                    "No schedule",
-                                  )
-                                : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} - "
+                                ? lang.text("no_schedule")
+                                : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year} "
                                       "${selectedDate!.hour.toString().padLeft(2, '0')}:"
                                       "${selectedDate!.minute.toString().padLeft(2, '0')}",
                           ),
@@ -149,7 +143,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(AppText.t(context, "Hủy", "Cancel")),
+                  child: Text(lang.text("cancel")),
                 ),
                 ElevatedButton(
                   onPressed: () async {
@@ -175,7 +169,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
                     if (mounted) Navigator.pop(context);
                   },
-                  child: Text(AppText.t(context, "Lưu", "Save")),
+                  child: Text(lang.text("save")),
                 ),
               ],
             );
@@ -205,34 +199,34 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
 
   // ================= ĐẾM NGƯỢC =================
   String _thoiGianConLai(DateTime thoiGian) {
+    final lang = context.watch<NgonNguQuanLy>();
     final diff = thoiGian.difference(DateTime.now());
 
     if (diff.isNegative) {
-      return AppText.t(context, "Đã hết hạn", "Expired");
+      return lang.text("expired");
     }
 
     final gio = diff.inHours;
     final phut = diff.inMinutes % 60;
     final giay = diff.inSeconds % 60;
 
-    if (Localizations.localeOf(context).languageCode == 'vi') {
-      return "$gio giờ $phut phút $giay giây";
-    } else {
-      return "$gio h $phut m $giay s";
-    }
+    return "$gio ${lang.text("hours")} "
+        "$phut ${lang.text("minutes")} "
+        "$giay ${lang.text("seconds")}";
   }
 
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<NgonNguQuanLy>();
+
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(AppText.t(context, "Không gian làm việc", "Work Space")),
+        title: Text(lang.text("work_space")),
         centerTitle: true,
-        elevation: 0,
         backgroundColor: Colors.transparent,
       ),
-      extendBodyBehindAppBar: true,
       body: Stack(
         children: [
           Positioned.fill(
@@ -255,7 +249,7 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
             child: danhSach.isEmpty
                 ? Center(
                     child: Text(
-                      AppText.t(context, "Chưa có công việc", "No tasks yet"),
+                      lang.text("no_task"),
                       style: const TextStyle(color: Colors.white, fontSize: 18),
                     ),
                   )
@@ -268,56 +262,51 @@ class _KhongGianLamViecState extends State<KhongGianLamViec> {
                           congViec.thoiGianHen != null &&
                           congViec.thoiGianHen!.isBefore(DateTime.now());
 
-                      return Dismissible(
-                        key: ValueKey(congViec.id),
-                        direction: DismissDirection.endToStart,
-                        onDismissed: (_) => _xoa(index),
-                        child: Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          padding: const EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                          child: Row(
-                            children: [
-                              Checkbox(
-                                value: congViec.daHoanThanh,
-                                onChanged: (_) => _toggle(index),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          color: Colors.white.withOpacity(0.9),
+                        ),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: congViec.daHoanThanh,
+                              onChanged: (_) => _toggle(index),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    congViec.tieuDe,
+                                    style: TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w600,
+                                      decoration: congViec.daHoanThanh
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                    ),
+                                  ),
+                                  if (congViec.thoiGianHen != null)
                                     Text(
-                                      congViec.tieuDe,
+                                      _thoiGianConLai(congViec.thoiGianHen!),
                                       style: TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w600,
-                                        decoration: congViec.daHoanThanh
-                                            ? TextDecoration.lineThrough
-                                            : null,
+                                        color: hetHan
+                                            ? Colors.red
+                                            : Colors.green,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    if (congViec.thoiGianHen != null)
-                                      Text(
-                                        _thoiGianConLai(congViec.thoiGianHen!),
-                                        style: TextStyle(
-                                          color: hetHan
-                                              ? Colors.red
-                                              : Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                  ],
-                                ),
+                                ],
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () => _moHopThoai(index: index),
-                              ),
-                            ],
-                          ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.edit),
+                              onPressed: () => _moHopThoai(index: index),
+                            ),
+                          ],
                         ),
                       );
                     },

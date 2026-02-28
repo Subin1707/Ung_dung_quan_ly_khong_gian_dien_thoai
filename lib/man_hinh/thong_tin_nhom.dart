@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:provider/provider.dart';
+import '../ngon_ngu/ngon_ngu_quan_ly.dart';
 
 class ThongTinNhom extends StatefulWidget {
   const ThongTinNhom({super.key});
@@ -15,27 +17,19 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
   @override
   void initState() {
     super.initState();
-
     _bgController = VideoPlayerController.asset("assets/video/nenthongtin.mp4");
-
     _initializeVideo();
   }
 
   Future<void> _initializeVideo() async {
-    try {
-      await _bgController.initialize();
-      _bgController
-        ..setLooping(true)
-        ..setVolume(0)
-        ..play();
+    await _bgController.initialize();
+    _bgController
+      ..setLooping(true)
+      ..setVolume(0)
+      ..play();
 
-      if (mounted) {
-        setState(() {
-          _initialized = true;
-        });
-      }
-    } catch (e) {
-      debugPrint("Video load error: $e");
+    if (mounted) {
+      setState(() => _initialized = true);
     }
   }
 
@@ -47,6 +41,8 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
 
   @override
   Widget build(BuildContext context) {
+    final lang = context.watch<NgonNguQuanLy>();
+
     if (!_initialized) {
       return const Scaffold(
         backgroundColor: Colors.black,
@@ -57,7 +53,6 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
     return Scaffold(
       body: Stack(
         children: [
-          /// ===== VIDEO BACKGROUND =====
           Positioned.fill(
             child: FittedBox(
               fit: BoxFit.cover,
@@ -68,11 +63,8 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
               ),
             ),
           ),
-
-          /// Lớp làm tối video
           Container(color: Colors.black.withOpacity(0.5)),
 
-          /// ===== NỘI DUNG =====
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -86,20 +78,12 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      /// ===== LOGO (ẢNH) =====
                       Container(
                         width: 160,
                         height: 160,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 4),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.6),
-                              blurRadius: 15,
-                              spreadRadius: 2,
-                            ),
-                          ],
                         ),
                         child: ClipOval(
                           child: Image.asset(
@@ -110,9 +94,9 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
                       ),
                       const SizedBox(height: 20),
 
-                      const Text(
-                        "BÀI TẬP LỚN CUỐI KỲ",
-                        style: TextStyle(
+                      Text(
+                        lang.text("final_project"),
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -122,9 +106,9 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
 
                       const SizedBox(height: 8),
 
-                      const Text(
-                        "NHÓM 13",
-                        style: TextStyle(
+                      Text(
+                        lang.text("group_number"),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Colors.amber,
@@ -138,21 +122,21 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
                       ),
 
                       _thongTinDong(
-                        "Môn học",
-                        "Lập trình cho thiết bị di động",
+                        lang.text("subject"),
+                        lang.text("mobile_subject"),
                       ),
                       _thongTinDong(
-                        "Tên đề tài",
-                        "Quản lý & cá nhân hóa không gian điện thoại",
+                        lang.text("project_name"),
+                        lang.text("project_title_full"),
                       ),
 
                       const SizedBox(height: 25),
 
-                      const Align(
+                      Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Giảng viên hướng dẫn:",
-                          style: TextStyle(
+                          lang.text("teacher"),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Colors.amber,
@@ -173,11 +157,11 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
 
                       const SizedBox(height: 25),
 
-                      const Align(
+                      Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Thành viên nhóm:",
-                          style: TextStyle(
+                          lang.text("members"),
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: Colors.amber,
@@ -194,18 +178,20 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
                             "assets/hinh_anh/quyen.jpg",
                             "Nguyễn Mạnh Quyền",
                             "23010198",
+                            lang,
                           ),
                           _thanhVienCard(
                             "assets/hinh_anh/hoang.jpg",
                             "Phạm Văn Hoàng",
                             "23010245",
+                            lang,
                           ),
                         ],
                       ),
 
                       const SizedBox(height: 25),
 
-                      _thongTinDong("Năm thực hiện", "2025"),
+                      _thongTinDong(lang.text("year"), "2025"),
                     ],
                   ),
                 ),
@@ -241,7 +227,12 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
     );
   }
 
-  Widget _thanhVienCard(String imagePath, String ten, String mssv) {
+  Widget _thanhVienCard(
+    String imagePath,
+    String ten,
+    String mssv,
+    NgonNguQuanLy lang,
+  ) {
     return Column(
       children: [
         CircleAvatar(radius: 45, backgroundImage: AssetImage(imagePath)),
@@ -256,7 +247,7 @@ class _ThongTinNhomState extends State<ThongTinNhom> {
           textAlign: TextAlign.center,
         ),
         Text(
-          "MSSV: $mssv",
+          "${lang.text("student_id")}: $mssv",
           style: const TextStyle(fontSize: 13, color: Colors.white70),
         ),
       ],

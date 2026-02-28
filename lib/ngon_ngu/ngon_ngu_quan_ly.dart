@@ -9,7 +9,7 @@ class NgonNguQuanLy extends ChangeNotifier {
 
   NgonNgu get current => _current;
 
-  /// 🔥 THÊM CÁI NÀY
+  /// Locale dùng cho MaterialApp
   Locale get locale {
     switch (_current) {
       case NgonNgu.en:
@@ -20,11 +20,13 @@ class NgonNguQuanLy extends ChangeNotifier {
     }
   }
 
+  /// ĐỔI NGÔN NGỮ (DÙNG ENUM – KHÔNG DÙNG STRING)
   void doiNgonNgu(NgonNgu ngonNgu) {
     _current = ngonNgu;
     notifyListeners();
   }
 
+  /// LẤY TEXT THEO KEY
   String text(String key) {
     switch (_current) {
       case NgonNgu.en:
