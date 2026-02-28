@@ -44,34 +44,101 @@ class _TrangChuState extends State<TrangChu> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          if (_controller.value.isInitialized)
-            SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: _controller.value.size.width,
-                  height: _controller.value.size.height,
-                  child: VideoPlayer(_controller),
-                ),
-              ),
+      extendBodyBehindAppBar: true,
+
+      // ===== APPBAR =====
+      appBar: AppBar(
+        title: const Text("Space App"),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+
+      // ===== DRAWER MENU =====
+      drawer: Drawer(
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF667eea), Color(0xFF764ba2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-
-          Container(color: Colors.black.withOpacity(0.4)),
-
-          SafeArea(
+          ),
+          child: SafeArea(
             child: Column(
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
+                const CircleAvatar(
+                  radius: 40,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.apps, size: 40, color: Colors.deepPurple),
+                ),
+                const SizedBox(height: 15),
+                const Text(
+                  "Ứng dụng Quản lý",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Divider(color: Colors.white54, height: 40),
 
-                // 🔥 Dropdown đổi ngôn ngữ
-                Align(
-                  alignment: Alignment.topRight,
+                _buildDrawerItem(
+                  icon: Icons.work,
+                  title: getText(context, "Không gian làm việc", "Work Space"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const KhongGianLamViec(),
+                      ),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.self_improvement,
+                  title: getText(context, "Thư giãn", "Relax"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const KhongGianThuGian(),
+                      ),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.person,
+                  title: getText(context, "Cá nhân", "Personal"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const KhongGianCaNhan(),
+                      ),
+                    );
+                  },
+                ),
+                _buildDrawerItem(
+                  icon: Icons.info,
+                  title: getText(context, "Thông tin nhóm", "Team Info"),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ThongTinNhom()),
+                    );
+                  },
+                ),
+
+                const Spacer(),
+
+                // ===== ĐỔI NGÔN NGỮ =====
+                Padding(
+                  padding: const EdgeInsets.all(16),
                   child: DropdownButton<String>(
                     value: Localizations.localeOf(context).languageCode,
-                    dropdownColor: Colors.black87,
+                    dropdownColor: Colors.deepPurple,
                     style: const TextStyle(color: Colors.white),
                     iconEnabledColor: Colors.white,
                     underline: const SizedBox(),
@@ -86,9 +153,34 @@ class _TrangChuState extends State<TrangChu> {
                     },
                   ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
 
-                const SizedBox(height: 10),
+      // ===== BODY =====
+      body: Stack(
+        children: [
+          // VIDEO BACKGROUND
+          if (_controller.value.isInitialized)
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
+                ),
+              ),
+            ),
 
+          Container(color: Colors.black.withOpacity(0.5)),
+
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 80),
                 Text(
                   getText(
                     context,
@@ -102,8 +194,7 @@ class _TrangChuState extends State<TrangChu> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-
-                const SizedBox(height: 20),
+                const SizedBox(height: 30),
 
                 Expanded(
                   child: Padding(
@@ -157,6 +248,18 @@ class _TrangChuState extends State<TrangChu> {
     );
   }
 
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: Colors.white),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: onTap,
+    );
+  }
+
   Widget _buildCard(
     BuildContext context, {
     required IconData icon,
@@ -175,7 +278,7 @@ class _TrangChuState extends State<TrangChu> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
-          color: Colors.white.withOpacity(0.85),
+          color: Colors.white.withOpacity(0.9),
           boxShadow: const [
             BoxShadow(
               color: Colors.black26,
