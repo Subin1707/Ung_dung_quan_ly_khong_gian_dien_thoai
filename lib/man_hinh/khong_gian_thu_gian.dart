@@ -19,7 +19,6 @@ enum CheDoPhat { thuTu, ngauNhien, lapMot, lapTatCa }
 class _KhongGianThuGianState extends State<KhongGianThuGian> {
   late VideoPlayerController _videoController;
   final AudioPlayer _audioPlayer = AudioPlayer();
-
   bool videoSanSang = false;
   bool dangPhatNhac = false;
   bool daPhatLanDau = false;
@@ -230,6 +229,22 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     return cheDo == CheDoPhat.thuTu ? Colors.grey : Colors.blue;
   }
 
+  Future<void> _moSach(int index) async {
+    String noiDung = await rootBundle.loadString(danhSachSach[index]["file"]!);
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Text(noiDung, style: const TextStyle(fontSize: 16)),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = context.watch<NgonNguQuanLy>();
@@ -237,7 +252,6 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       drawer: const AppDrawer(),
-
       appBar: AppBar(
         title: Text(lang.text("relax")),
         backgroundColor: Colors.transparent,
@@ -256,11 +270,9 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                 ),
               ),
             ),
-
           Positioned.fill(
             child: Container(color: Colors.black.withOpacity(0.6)),
           ),
-
           SafeArea(
             child: ListView(
               padding: const EdgeInsets.all(16),
@@ -273,25 +285,17 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
                     color: Colors.white,
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 _playerCard(),
-
                 const SizedBox(height: 30),
-
                 _sectionTitle(lang.text("music_list")),
                 const SizedBox(height: 15),
                 _musicGrid(),
-
                 const SizedBox(height: 30),
-
                 _sectionTitle(lang.text("book_list")),
                 const SizedBox(height: 15),
                 _bookGrid(),
-
                 const SizedBox(height: 30),
-
                 _sectionTitle(lang.text("quotes")),
                 const SizedBox(height: 15),
                 ...danhSachTrichDan.map((e) => _quoteItem(e)),
@@ -405,11 +409,14 @@ class _KhongGianThuGianState extends State<KhongGianThuGian> {
           mainAxisSpacing: 12,
         ),
         itemBuilder: (context, index) {
-          return ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset(
-              danhSachSach[index]["poster"]!,
-              fit: BoxFit.cover,
+          return GestureDetector(
+            onTap: () => _moSach(index),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                danhSachSach[index]["poster"]!,
+                fit: BoxFit.cover,
+              ),
             ),
           );
         },
